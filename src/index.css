@@ -1,0 +1,362 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.5s ease-out;
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.5s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 1.5s infinite;
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Add delay classes */
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-300 {
+  animation-delay: 0.3s;
+}
+
+.delay-400 {
+  animation-delay: 0.4s;
+}
+
+.delay-500 {
+  animation-delay: 0.5s;
+}
+
+.delay-600 {
+  animation-delay: 0.6s;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .ant-table {
+    font-size: 12px !important;
+  }
+  
+  .ant-card-head-title {
+    font-size: 15px !important;
+  }
+  
+  .sm-pt-4 {
+    padding-top: 1rem !important;
+  }
+  
+  .sm-px-2 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  .sm-text-center {
+    text-align: center !important;
+  }
+
+  .ant-table-cell {
+    padding: 8px 4px !important;
+    white-space: nowrap;
+  }
+
+  .ant-card-body {
+    padding: 12px 8px !important;
+  }
+
+  .ant-btn {
+    padding: 0 8px !important;
+    font-size: 12px !important;
+    height: 30px !important;
+  }
+
+  .ant-form-item {
+    margin-bottom: 12px !important;
+  }
+
+  .ant-modal-body {
+    padding: 12px !important;
+  }
+
+  .ant-statistic {
+    font-size: 14px !important;
+  }
+
+  .ant-statistic-content {
+    font-size: 18px !important;
+  }
+
+  .mobile-full-width {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .mobile-block {
+    display: block !important;
+  }
+  
+  /* Reduce font sizes for mobile */
+  h1, h2 {
+    font-size: 1.5rem !important;
+  }
+  
+  h3, h4 {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Adjust cards for mobile */
+  .ant-card-body {
+    padding: 16px !important;
+  }
+  
+  /* Adjust tables for mobile */
+  .ant-table {
+    font-size: 0.85rem !important;
+  }
+  
+  /* Adjust inputs for mobile */
+  .ant-input, .ant-select, .ant-btn {
+    height: 36px !important;
+    font-size: 0.9rem !important;
+  }
+  
+  /* Adjust gaps for mobile */
+  .gap-4 {
+    gap: 0.75rem !important;
+  }
+}
+
+/* Smooth transitions */
+.ant-card,
+.ant-btn,
+.ant-input,
+.ant-select {
+  transition: all 0.3s ease;
+}
+
+/* Hover effects */
+.ant-card:hover {
+  transform: translateY(-2px);
+}
+
+.ant-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* Transisi untuk hover effects */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+.transition-transform {
+  transition: transform 0.3s ease;
+}
+
+.transition-shadow {
+  transition: box-shadow 0.3s ease;
+}
+
+/* Hover effects */
+.hover-scale:hover {
+  transform: scale(1.03);
+}
+
+.hover-rotate:hover {
+  transform: rotate(2deg);
+}
+
+/* Scroll animation */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease-out;
+}
+
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Mobile-specific fixes */
+@media (max-width: 480px) {
+  .mobile-full-width {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .mobile-text-xs {
+    font-size: 0.75rem !important;
+  }
+
+  .mobile-p-2 {
+    padding: 0.5rem !important;
+  }
+
+  .mobile-hidden {
+    display: none !important;
+  }
+
+  .mobile-block {
+    display: block !important;
+  }
+
+  .mobile-flex-col {
+    flex-direction: column !important;
+  }
+
+  .mobile-mt-2 {
+    margin-top: 0.5rem !important;
+  }
+
+  .mobile-mb-2 {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .ant-tabs-tab {
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+  }
+
+  .ant-pagination-item {
+    min-width: 28px !important;
+    height: 28px !important;
+    line-height: 26px !important;
+  }
+
+  .ant-card-body {
+    padding: 12px !important;
+  }
+  
+  .ant-table {
+    font-size: 0.8rem !important;
+  }
+  
+  /* Stack buttons in forms */
+  .ant-form-item-control-input-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .ant-form-item-control-input-content .ant-btn {
+    width: 100%;
+  }
+}
+
+/* Animation classes */
+.hover-scale {
+  transition: transform 0.2s ease-in-out;
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.5s ease-in-out;
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.5s ease-in-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
