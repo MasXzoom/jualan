@@ -262,7 +262,7 @@ const Sales: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {loading ? (
               Array(8).fill(0).map((_, i) => (
-                <Card key={i} loading className="hover:shadow-lg transition-shadow duration-300 rounded-xl" />
+                <Card key={i} loading className="hover:shadow-lg transition-shadow duration-300 rounded-xl h-[180px]" />
               ))
             ) : filteredSales.length === 0 ? (
               <div className="col-span-full text-center py-10">
@@ -273,6 +273,16 @@ const Sales: React.FC = () => {
                 <Card 
                   key={sale.id}
                   className="hover:shadow-lg transition-all duration-300 border-t-4 border-t-indigo-500 rounded-xl overflow-hidden"
+                  style={{ 
+                    height: 'auto',
+                    maxHeight: '240px'
+                  }}
+                  bodyStyle={{
+                    padding: '16px',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
                   actions={[
                     <Popconfirm
                       key="delete"
@@ -294,20 +304,20 @@ const Sales: React.FC = () => {
                   ]}
                 >
                   <div className="flex flex-col h-full">
-                    <div className="mb-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-sm text-gray-600">{dayjs(sale.date).format('DD/MM/YYYY')}</span>
+                    <div className="mb-2">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs text-gray-600">{dayjs(sale.date).format('DD/MM/YYYY')}</span>
                         {getStatusTag(sale.status)}
                       </div>
-                      <h3 className="text-lg font-medium text-gray-800">
+                      <h3 className="text-base font-medium text-gray-800 truncate">
                         {sale.products?.name || 'Produk'}
-                        <Tag className="ml-2 bg-indigo-100 text-indigo-800 border-0">x{sale.quantity}</Tag>
+                        <Tag className="ml-1 bg-indigo-100 text-indigo-800 border-0 text-xs">x{sale.quantity}</Tag>
                       </h3>
-                      <p className="text-gray-500 text-sm">Pelanggan: {sale.customer_name}</p>
+                      <p className="text-gray-500 text-xs truncate">Pelanggan: {sale.customer_name}</p>
                     </div>
-                    <div className="mt-auto pt-3 border-t border-gray-100">
+                    <div className="mt-auto pt-2 border-t border-gray-100">
                       <div className="flex justify-between items-center">
-                        <span className="text-lg font-semibold text-indigo-600">{formatCurrency(sale.total_amount)}</span>
+                        <span className="text-base font-semibold text-indigo-600">{formatCurrency(sale.total_amount)}</span>
                       </div>
                     </div>
                   </div>

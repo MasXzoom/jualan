@@ -19,7 +19,6 @@ const Footer: React.FC = () => {
           <div className="flex items-center text-gray-600 text-sm">
             <span>Dibuat dengan</span>
             <HeartIcon className="w-4 h-4 mx-1 text-red-500" />
-            <span>di Indonesia</span>
           </div>
         </div>
       </div>

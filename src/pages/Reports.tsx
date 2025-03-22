@@ -242,50 +242,61 @@ const Reports = () => {
         grid={{ 
           gutter: 16, 
           xs: 1, 
-          sm: 1, 
+          sm: 2, 
           md: 2, 
           lg: 3, 
-          xl: 3, 
+          xl: 4, 
           xxl: 4 
         }}
         dataSource={data}
         pagination={{
-          pageSize: 6,
+          pageSize: isMobile ? 4 : 8,
           responsive: true,
           showSizeChanger: !isMobile,
+          size: isMobile ? 'small' : 'default'
         }}
         renderItem={(item) => (
           <List.Item>
             <Card 
               className="hover:shadow-lg transition-all duration-300"
               hoverable
+              style={{ 
+                height: 'auto',
+                maxHeight: '240px'
+              }}
+              bodyStyle={{
+                padding: '16px',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
             >
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 h-full">
                 <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-blue-600" />
-                    <Text className="text-gray-700">{item['Tanggal']}</Text>
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-blue-600" />
+                    <Text className="text-gray-700 text-xs">{item['Tanggal']}</Text>
                   </div>
-                  <Tag color={item['Status'] === 'Completed' ? 'green' : 'blue'}>
+                  <Tag color={item['Status'] === 'Completed' ? 'green' : 'blue'} className="text-xs px-1 py-0">
                     {item['Status'] || 'Diproses'}
                   </Tag>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-blue-600" />
-                  <Text strong>{item['Pelanggan']}</Text>
+                <div className="flex items-center gap-1">
+                  <User className="w-3 h-3 text-blue-600" />
+                  <Text strong className="text-xs truncate">{item['Pelanggan']}</Text>
                 </div>
                 
-                <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4 text-blue-600" />
-                  <Text>{item['Produk']}</Text>
-                  <Tag color="blue">{item['Jumlah']} item</Tag>
+                <div className="flex items-center gap-1">
+                  <Package className="w-3 h-3 text-blue-600" />
+                  <Text className="text-xs truncate">{item['Produk']}</Text>
+                  <Tag color="blue" className="text-xs px-1 py-0">{item['Jumlah']} item</Tag>
                 </div>
                 
-                <div className="mt-2 pt-2 border-t">
+                <div className="mt-auto pt-2 border-t">
                   <div className="flex justify-between items-center">
-                    <Text type="secondary">Total</Text>
-                    <Text strong className="text-lg text-blue-600">{item['Total']}</Text>
+                    <Text type="secondary" className="text-xs">Total</Text>
+                    <Text strong className="text-base text-blue-600">{item['Total']}</Text>
                   </div>
                 </div>
               </div>
@@ -309,42 +320,49 @@ const Reports = () => {
         grid={{ 
           gutter: 16, 
           xs: 1, 
-          sm: 1, 
+          sm: 2, 
           md: 2, 
           lg: 3, 
-          xl: 3, 
+          xl: 4, 
           xxl: 4 
         }}
         dataSource={data}
         pagination={{
-          pageSize: 8,
+          pageSize: isMobile ? 4 : 8,
           responsive: true,
           showSizeChanger: !isMobile,
+          size: isMobile ? 'small' : 'default'
         }}
         renderItem={(item) => (
           <List.Item>
             <Card 
               className="hover:shadow-lg transition-all duration-300"
               hoverable
+              style={{ 
+                height: 'auto',
+                maxHeight: '240px'
+              }}
+              bodyStyle={{
+                padding: '16px',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
             >
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 h-full">
                 <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4 text-green-600" />
-                  <Text strong>{item['Nama Produk']}</Text>
+                  <Package className="w-3 h-3 text-green-600" />
+                  <Text strong className="text-xs truncate">{item['Nama Produk']}</Text>
                 </div>
                 
-                <Text type="secondary" ellipsis={{ tooltip: item['Deskripsi'] }}>
+                <Text type="secondary" ellipsis={{ tooltip: item['Deskripsi'] }} className="text-xs truncate">
                   {item['Deskripsi']}
                 </Text>
                 
-                <div className="mt-2 pt-2 border-t">
+                <div className="mt-auto pt-2 border-t">
                   <div className="flex justify-between items-center">
-                    <Text strong>{item['Harga']}</Text>
-                    <Tag 
-                      color={(item['Stok'] as number) > 10 ? 'green' : (item['Stok'] as number) > 5 ? 'orange' : 'red'}
-                    >
-                      Stok: {item['Stok']}
-                    </Tag>
+                    <Text type="secondary" className="text-xs">Harga</Text>
+                    <Text strong className="text-base text-green-600">{item['Harga']}</Text>
                   </div>
                 </div>
               </div>
@@ -368,34 +386,45 @@ const Reports = () => {
         grid={{ 
           gutter: 16, 
           xs: 1, 
-          sm: 1, 
+          sm: 2, 
           md: 2, 
-          lg: 2, 
-          xl: 3, 
+          lg: 3, 
+          xl: 4, 
           xxl: 4 
         }}
         dataSource={data}
         pagination={{
-          pageSize: 6,
+          pageSize: isMobile ? 4 : 8,
           responsive: true,
           showSizeChanger: !isMobile,
+          size: isMobile ? 'small' : 'default'
         }}
         renderItem={(item) => (
           <List.Item>
             <Card 
               className="hover:shadow-lg transition-all duration-300"
               hoverable
+              style={{ 
+                height: 'auto',
+                maxHeight: '240px'
+              }}
+              bodyStyle={{
+                padding: '16px',
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
             >
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 h-full">
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-blue-600" />
-                  <Text className="text-gray-700">{item['Tanggal']}</Text>
+                  <Clock className="w-3 h-3 text-blue-600" />
+                  <Text className="text-gray-700 text-xs">{item['Tanggal']}</Text>
                 </div>
                 
-                <div className="mt-2 pt-2">
+                <div className="mt-auto pt-2 border-t">
                   <div className="flex justify-between items-center">
-                    <Text type="secondary">Pendapatan</Text>
-                    <Text strong className="text-lg text-green-600">{item['Pendapatan']}</Text>
+                    <Text type="secondary" className="text-xs">Pendapatan</Text>
+                    <Text strong className="text-base text-green-600">{item['Pendapatan']}</Text>
                   </div>
                 </div>
               </div>
@@ -431,7 +460,7 @@ const Reports = () => {
             <Title level={5} className="m-0">Filter Periode Laporan</Title>
             <Text type="secondary">Pilih rentang tanggal untuk melihat laporan</Text>
           </div>
-          <Space direction="vertical" size="middle">
+          <Space direction="vertical" size="middle" className="w-full md:w-auto max-w-full">
             <DatePicker.RangePicker 
               value={dateRange} 
               onChange={(dates) => {
@@ -445,9 +474,14 @@ const Reports = () => {
               placeholder={['Tanggal Awal', 'Tanggal Akhir']}
               allowClear
               className="w-full"
+              style={{ width: isMobile ? '100%' : 'auto', minWidth: isMobile ? 'auto' : '320px' }}
+              size={isMobile ? 'middle' : 'large'}
+              popupClassName="date-range-popup"
+              separator={isMobile ? "→" : "-"}
+              inputReadOnly={isMobile} // Mencegah keyboard mobile muncul, pengguna hanya menggunakan date picker
             />
             {dateRange[0] && dateRange[1] && (
-              <div className="text-right">
+              <div className={`${isMobile ? 'text-center' : 'text-right'}`}>
                 <Text type="secondary" className="block mb-1">
                   Menampilkan laporan periode:
                 </Text>

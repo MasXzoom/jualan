@@ -175,7 +175,7 @@ const Products = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {loading ? (
               Array(8).fill(0).map((_, i) => (
-                <Card key={i} loading className="hover:shadow-lg transition-shadow duration-300 rounded-xl" />
+                <Card key={i} loading className="hover:shadow-lg transition-shadow duration-300 rounded-xl h-[180px]" />
               ))
             ) : filteredProducts.length === 0 ? (
               <div className="col-span-full text-center py-10">
@@ -186,6 +186,16 @@ const Products = () => {
                 <Card 
                   key={product.id}
                   className="hover:shadow-lg transition-all duration-300 border-t-4 border-t-blue-500 rounded-xl overflow-hidden"
+                  style={{ 
+                    height: 'auto',
+                    maxHeight: '240px'
+                  }}
+                  bodyStyle={{
+                    padding: '16px',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}
                   actions={[
                     <Button 
                       key="edit"
@@ -218,14 +228,14 @@ const Products = () => {
                   ]}
                 >
                   <div className="flex flex-col h-full">
-                    <div className="mb-4">
-                      <h3 className="text-lg font-medium text-gray-800">{product.name}</h3>
-                      <p className="text-gray-500 line-clamp-2 h-10 text-sm">{product.description || 'Tidak ada deskripsi'}</p>
+                    <div className="mb-2">
+                      <h3 className="text-base font-medium text-gray-800 truncate">{product.name}</h3>
+                      <p className="text-gray-500 line-clamp-2 text-xs h-8">{product.description || 'Tidak ada deskripsi'}</p>
                     </div>
                     <div className="mt-auto">
                       <div className="flex justify-between items-center">
-                        <span className="text-lg font-semibold text-blue-600">{formatCurrency(product.price)}</span>
-                        <Tag color={product.stock > 10 ? 'green' : 'orange'} className="ml-2">
+                        <span className="text-base font-semibold text-blue-600">{formatCurrency(product.price)}</span>
+                        <Tag color={product.stock > 10 ? 'green' : 'orange'} className="ml-2 text-xs">
                           Stok: {product.stock}
                         </Tag>
                       </div>
