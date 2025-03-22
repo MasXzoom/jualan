@@ -191,10 +191,47 @@ const Reports = () => {
       doc.setFontSize(11);
       doc.text(`Tanggal: ${dayjs().format('DD/MM/YYYY')}`, 14, 30);
       
+      // Calculate totals
+      let startY = 35;
+      if (reportType === 'sales') {
+        const totalAmount = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
+        const totalProductsSold = filteredSales.reduce((sum, sale) => sum + sale.quantity, 0);
+        
+        // Add summary information
+        doc.setFontSize(10);
+        doc.text(`Total Penjualan: ${formatCurrencyWithType(totalAmount)}`, 14, startY + 7);
+        doc.text(`Total Produk Terjual: ${totalProductsSold} item`, 14, startY + 14);
+        
+        startY += 24;
+      } else if (reportType === 'inventory') {
+        const totalProducts = products.length;
+        const totalStock = products.reduce((sum, product) => sum + product.stock, 0);
+        const totalValue = products.reduce((sum, product) => sum + (product.price * product.stock), 0);
+        
+        // Add summary information
+        doc.setFontSize(10);
+        doc.text(`Total Produk: ${totalProducts} jenis`, 14, startY + 7);
+        doc.text(`Total Stok: ${totalStock} item`, 14, startY + 14);
+        doc.text(`Total Nilai Inventaris: ${formatCurrencyWithType(totalValue)}`, 14, startY + 21);
+        
+        startY += 31;
+      } else if (reportType === 'revenue') {
+        const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
+        const totalTransactions = filteredSales.length;
+        const averageTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
+        
+        // Add summary information
+        doc.setFontSize(10);
+        doc.text(`Total Pendapatan: ${formatCurrencyWithType(totalRevenue)}`, 14, startY + 7);
+        doc.text(`Total Transaksi: ${totalTransactions}`, 14, startY + 14);
+        doc.text(`Rata-rata Per Transaksi: ${formatCurrencyWithType(averageTransaction)}`, 14, startY + 21);
+        
+        startY += 31;
+      }
+      
       // Create table
       const columns = Object.keys(data[0]).map(key => ({ header: key, dataKey: key }));
       
-      let startY = 35;
       // Filter info if date range is applied
       if (dateRange[0] && dateRange[1]) {
         doc.setFontSize(10);
