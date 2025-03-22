@@ -196,36 +196,6 @@ const Products = () => {
                     display: 'flex',
                     flexDirection: 'column'
                   }}
-                  actions={[
-                    <Button 
-                      key="edit"
-                      type="text" 
-                      icon={<Edit2 className="w-4 h-4" />}
-                      className="text-blue-600 hover:text-blue-800"
-                      onClick={() => {
-                        setEditingId(product.id);
-                        form.setFieldsValue(product);
-                        setIsModalVisible(true);
-                      }}
-                    >
-                      Edit
-                    </Button>,
-                    <Popconfirm
-                      key="delete"
-                      title="Yakin ingin menghapus produk ini?"
-                      onConfirm={() => handleDelete(product.id)}
-                      okText="Ya"
-                      cancelText="Tidak"
-                    >
-                      <Button 
-                        type="text" 
-                        icon={<Trash2 className="w-4 h-4" />}
-                        className="text-red-600 hover:text-red-800"
-                      >
-                        Hapus
-                      </Button>
-                    </Popconfirm>
-                  ]}
                 >
                   <div className="flex flex-col h-full">
                     <div className="mb-2">
@@ -238,6 +208,34 @@ const Products = () => {
                         <Tag color={product.stock > 10 ? 'green' : 'orange'} className="ml-2 text-xs">
                           Stok: {product.stock}
                         </Tag>
+                      </div>
+                      <div className="flex justify-between mt-2">
+                        <Button 
+                          type="link" 
+                          icon={<Edit2 className="w-4 h-4" />}
+                          className="text-blue-600 hover:text-blue-800 p-0"
+                          onClick={() => {
+                            setEditingId(product.id);
+                            form.setFieldsValue(product);
+                            setIsModalVisible(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Popconfirm
+                          title="Yakin ingin menghapus produk ini?"
+                          onConfirm={() => handleDelete(product.id)}
+                          okText="Ya"
+                          cancelText="Tidak"
+                        >
+                          <Button 
+                            type="link" 
+                            icon={<Trash2 className="w-4 h-4" />}
+                            className="text-red-600 hover:text-red-800 p-0"
+                          >
+                            Hapus
+                          </Button>
+                        </Popconfirm>
                       </div>
                     </div>
                   </div>
