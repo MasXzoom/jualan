@@ -191,46 +191,7 @@ const Reports = () => {
       doc.setFontSize(11);
       doc.text(`Tanggal: ${dayjs().format('DD/MM/YYYY')}`, 14, 30);
       
-      // Calculate totals
       let startY = 35;
-      if (reportType === 'sales') {
-        const totalAmount = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
-        const totalProductsSold = filteredSales.reduce((sum, sale) => sum + sale.quantity, 0);
-        
-        // Add summary information
-        doc.setFontSize(10);
-        doc.text(`Total Penjualan: ${formatCurrencyWithType(totalAmount)}`, 14, startY + 7);
-        doc.text(`Total Produk Terjual: ${totalProductsSold} item`, 14, startY + 14);
-        
-        startY += 24;
-      } else if (reportType === 'inventory') {
-        const totalProducts = products.length;
-        const totalStock = products.reduce((sum, product) => sum + product.stock, 0);
-        const totalValue = products.reduce((sum, product) => sum + (product.price * product.stock), 0);
-        
-        // Add summary information
-        doc.setFontSize(10);
-        doc.text(`Total Produk: ${totalProducts} jenis`, 14, startY + 7);
-        doc.text(`Total Stok: ${totalStock} item`, 14, startY + 14);
-        doc.text(`Total Nilai Inventaris: ${formatCurrencyWithType(totalValue)}`, 14, startY + 21);
-        
-        startY += 31;
-      } else if (reportType === 'revenue') {
-        const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
-        const totalTransactions = filteredSales.length;
-        const averageTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
-        
-        // Add summary information
-        doc.setFontSize(10);
-        doc.text(`Total Pendapatan: ${formatCurrencyWithType(totalRevenue)}`, 14, startY + 7);
-        doc.text(`Total Transaksi: ${totalTransactions}`, 14, startY + 14);
-        doc.text(`Rata-rata Per Transaksi: ${formatCurrencyWithType(averageTransaction)}`, 14, startY + 21);
-        
-        startY += 31;
-      }
-      
-      // Create table
-      const columns = Object.keys(data[0]).map(key => ({ header: key, dataKey: key }));
       
       // Filter info if date range is applied
       if (dateRange[0] && dateRange[1]) {
@@ -239,8 +200,11 @@ const Reports = () => {
         startY += 8;
       }
       
-      // Adjust starting Y position
-      autoTable(doc, {
+      // Create table
+      const columns = Object.keys(data[0]).map(key => ({ header: key, dataKey: key }));
+      
+      // Adjust starting Y position and save the final Y position after rendering the table
+      const finalY = autoTable(doc, {
         startY: startY,
         head: [columns.map(c => c.header)],
         body: data.map(item => 
@@ -248,7 +212,57 @@ const Reports = () => {
         ),
         theme: 'grid',
         headStyles: { fillColor: [59, 130, 246] },
-      });
+      }) as unknown as { finalY: number };
+      
+      // Add totals at the bottom after the table
+      let bottomY = finalY.finalY || startY + 30;
+      bottomY += 10; // Add some spacing after the table
+      
+      // Calculate and render totals at the bottom
+      if (reportType === 'sales') {
+        const totalAmount = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
+        const totalProductsSold = filteredSales.reduce((sum, sale) => sum + sale.quantity, 0);
+        
+        // Add horizontal line before totals
+        doc.setDrawColor(200, 200, 200);
+        doc.line(14, bottomY - 5, 196, bottomY - 5);
+        
+        // Add summary information
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Total Penjualan: ${formatCurrencyWithType(totalAmount)}`, 14, bottomY);
+        doc.text(`Total Produk Terjual: ${totalProductsSold} item`, 14, bottomY + 7);
+      } else if (reportType === 'inventory') {
+        const totalProducts = products.length;
+        const totalStock = products.reduce((sum, product) => sum + product.stock, 0);
+        const totalValue = products.reduce((sum, product) => sum + (product.price * product.stock), 0);
+        
+        // Add horizontal line before totals
+        doc.setDrawColor(200, 200, 200);
+        doc.line(14, bottomY - 5, 196, bottomY - 5);
+        
+        // Add summary information
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Total Produk: ${totalProducts} jenis`, 14, bottomY);
+        doc.text(`Total Stok: ${totalStock} item`, 14, bottomY + 7);
+        doc.text(`Total Nilai Inventaris: ${formatCurrencyWithType(totalValue)}`, 14, bottomY + 14);
+      } else if (reportType === 'revenue') {
+        const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
+        const totalTransactions = filteredSales.length;
+        const averageTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
+        
+        // Add horizontal line before totals
+        doc.setDrawColor(200, 200, 200);
+        doc.line(14, bottomY - 5, 196, bottomY - 5);
+        
+        // Add summary information
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Total Pendapatan: ${formatCurrencyWithType(totalRevenue)}`, 14, bottomY);
+        doc.text(`Total Transaksi: ${totalTransactions}`, 14, bottomY + 7);
+        doc.text(`Rata-rata Per Transaksi: ${formatCurrencyWithType(averageTransaction)}`, 14, bottomY + 14);
+      }
 
       // Generate filename
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
