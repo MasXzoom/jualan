@@ -212,10 +212,15 @@ const Reports = () => {
       // For sales report, add a total row at the bottom with blue background
       if (reportType === 'sales') {
         const totalAmount = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
+        const totalProductsSold = filteredSales.reduce((sum, sale) => sum + sale.quantity, 0);
         
-        // Create empty row with just the total
+        // Create total row with label, total quantity and total amount
         const totalRow = columns.map(c => {
-          if (c.header === 'Total') {
+          if (c.header === 'Pelanggan' || c.header === 'customer_name') {
+            return 'Total Penjualan & Produk Terjual';
+          } else if (c.header === 'Jumlah' || c.header === 'quantity') {
+            return `${totalProductsSold}`;
+          } else if (c.header === 'Total') {
             return formatCurrencyWithType(totalAmount);
           }
           return '';
@@ -226,7 +231,7 @@ const Reports = () => {
       }
       
       // Draw the table with the data
-      const tableResult: any = autoTable(doc, {
+      autoTable(doc, {
         startY: startY,
         head: [columns.map(c => c.header)],
         body: tableData,
@@ -240,31 +245,21 @@ const Reports = () => {
         didParseCell: (data) => {
           // Style the total row at the bottom for sales report
           if (reportType === 'sales' && data.row.index === tableData.length - 1) {
+            data.cell.styles.fillColor = [240, 240, 240]; // Light gray for all cells in total row
+            
             if (data.column.dataKey === 'Total' || data.column.raw === 'Total') {
-              data.cell.styles.fillColor = [210, 230, 255]; // Light blue background for total
               data.cell.styles.fontStyle = 'bold';
-            } else {
-              data.cell.styles.fillColor = [240, 240, 240]; // Light gray for other cells in total row
+            }
+            if (data.column.dataKey === 'Jumlah' || data.column.raw === 'Jumlah') {
+              data.cell.styles.fontStyle = 'bold';
+            }
+            if (data.column.dataKey === 'Pelanggan' || data.column.raw === 'Pelanggan') {
+              data.cell.styles.fontStyle = 'bold';
             }
           }
         }
       });
       
-      // Calculate totals for bottom display
-      if (reportType === 'sales') {
-        const finalY = (tableResult?.finalY || startY + 30) + 10;
-        const totalAmount = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
-        const totalProductsSold = filteredSales.reduce((sum, sale) => sum + sale.quantity, 0);
-        
-        // Add Total label
-        doc.setFontSize(10);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Total Penjualan & Produk Terjual`, 14, finalY);
-        
-        // Add item counts and total amount
-        doc.text(`${totalProductsSold} item - ${formatCurrencyWithType(totalAmount)}`, 14, finalY + 7);
-      }
-
       // Generate filename
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const filename = `Laporan_${reportTypeNames[reportType as keyof typeof reportTypeNames]}_${timestamp}.pdf`;
