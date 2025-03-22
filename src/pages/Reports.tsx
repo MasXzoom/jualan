@@ -191,58 +191,8 @@ const Reports = () => {
       doc.setFontSize(11);
       doc.text(`Tanggal: ${dayjs().format('DD/MM/YYYY')}`, 14, 30);
       
-      // Posisi awal untuk konten berikutnya
+      // Posisi awal untuk tabel
       let startY = 40;
-      
-      // Calculate totals for pre-table display
-      if (reportType === 'sales') {
-        const totalAmount = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
-        const totalProductsSold = filteredSales.reduce((sum, sale) => sum + sale.quantity, 0);
-        
-        // Draw highlighted background for total penjualan
-        doc.setFillColor(200, 255, 200); // Light green
-        doc.rect(10, startY - 5, 190, 10, 'F');
-        
-        // Add Total Penjualan
-        doc.setFontSize(10);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Total Penjualan: ${formatCurrencyWithType(totalAmount)}`, 14, startY);
-        
-        // Add Total Produk Terjual
-        doc.text(`Total Produk Terjual: ${totalProductsSold} item`, 14, startY + 10);
-        
-        startY += 25; // Adjust for the next content
-      } else if (reportType === 'inventory') {
-        const totalProducts = products.length;
-        const totalStock = products.reduce((sum, product) => sum + product.stock, 0);
-        
-        // Draw highlighted background for total products
-        doc.setFillColor(200, 255, 200); // Light green
-        doc.rect(10, startY - 5, 190, 10, 'F');
-        
-        // Add Total Products
-        doc.setFontSize(10);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Total Produk: ${totalProducts} jenis`, 14, startY);
-        
-        // Add Total Stock
-        doc.text(`Total Stok: ${totalStock} item`, 14, startY + 10);
-        
-        startY += 25; // Adjust for the next content
-      } else if (reportType === 'revenue') {
-        const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
-        
-        // Draw highlighted background for total revenue
-        doc.setFillColor(200, 255, 200); // Light green
-        doc.rect(10, startY - 5, 190, 10, 'F');
-        
-        // Add Total Revenue
-        doc.setFontSize(10);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Total Pendapatan: ${formatCurrencyWithType(totalRevenue)}`, 14, startY);
-        
-        startY += 15; // Adjust for the next content
-      }
       
       // Filter info if date range is applied
       if (dateRange[0] && dateRange[1]) {
@@ -259,7 +209,7 @@ const Reports = () => {
         columns.map(c => String(item[c.dataKey as keyof typeof item] || ''))
       );
       
-      // For sales report, add a total row at the bottom
+      // For sales report, add a total row at the bottom with blue background
       if (reportType === 'sales') {
         const totalAmount = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
         
@@ -276,7 +226,7 @@ const Reports = () => {
       }
       
       // Draw the table with the data
-      autoTable(doc, {
+      const tableResult: any = autoTable(doc, {
         startY: startY,
         head: [columns.map(c => c.header)],
         body: tableData,
@@ -299,6 +249,21 @@ const Reports = () => {
           }
         }
       });
+      
+      // Calculate totals for bottom display
+      if (reportType === 'sales') {
+        const finalY = (tableResult?.finalY || startY + 30) + 10;
+        const totalAmount = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
+        const totalProductsSold = filteredSales.reduce((sum, sale) => sum + sale.quantity, 0);
+        
+        // Add Total label
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Total Penjualan & Produk Terjual`, 14, finalY);
+        
+        // Add item counts and total amount
+        doc.text(`${totalProductsSold} item - ${formatCurrencyWithType(totalAmount)}`, 14, finalY + 7);
+      }
 
       // Generate filename
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
