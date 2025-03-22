@@ -38,7 +38,7 @@ const Products = () => {
   const [form] = Form.useForm();
   const [editingId, setEditingId] = useState<string | null>(null);
   const { products, loading, fetchProducts, subscribeToProducts } = useStore();
-  const [isBrowser, setIsBrowser] = useState(false);
+  const [isBrowser, setIsBrowserState] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [user, setUser] = useState<{id: string, email?: string} | null>(null);
 
@@ -54,7 +54,12 @@ const Products = () => {
     getCurrentUser();
     fetchProducts();
     const unsubscribe = subscribeToProducts();
-    setIsBrowser(typeof window !== 'undefined');
+    
+    // Hanya set isBrowser di client-side untuk menghindari error di server
+    if (typeof window !== 'undefined') {
+      setIsBrowserState(true);
+    }
+    
     return () => {
       if (typeof unsubscribe === 'function') {
         unsubscribe();

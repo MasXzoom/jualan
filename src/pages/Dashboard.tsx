@@ -3,10 +3,27 @@ import { Card, Row, Col, Statistic, Spin, Empty, Button, Segmented } from 'antd'
 import { Area, Pie } from '@ant-design/charts';
 import { TrendingUp, Package, ShoppingCart, DollarSign, Users, ChevronRight } from 'lucide-react';
 import { useStore } from '../lib/store';
+import { isBrowser, isMobileView } from '../utils/browser';
 
 const Dashboard = () => {
   const [visibleSection, setVisibleSection] = useState<'activity'|'charts'>('charts');
-  const isMobile = window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Cek apakah tampilan mobile hanya jika di browser
+    if (isBrowser()) {
+      setIsMobile(window.innerWidth < 768);
+      
+      const handleResize = () => {
+        setIsMobile(window.innerWidth < 768);
+      };
+      
+      window.addEventListener('resize', handleResize);
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
+    }
+  }, []);
 
   const { 
     products, 

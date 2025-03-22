@@ -1,18 +1,18 @@
 {
-  "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
-  "framework": "vite",
-  "outputDirectory": "dist",
-  "routes": [
+  "build": {
+    "env": {
+      "VITE_SUPABASE_URL": "https://hxjxyuftzkikeslrgmed.supabase.co",
+      "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4anh5dWZ0emtpa2VzbHJnbWVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI2MTE0ODQsImV4cCI6MjA1ODE4NzQ4NH0.s8VoerotQ8cVLHV5reO1wKg66ODQA-z120EvW3Po7fI"
+    }
+  },
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ],
-  "env": {
-    "VITE_SUPABASE_URL": "@vite_supabase_url",
-    "VITE_SUPABASE_ANON_KEY": "@vite_supabase_anon_key",
-    "VITE_APP_NAME": "Sales Tracking App"
-  }
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/.*", "dest": "/index.html" }
+  ]
 } 

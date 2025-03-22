@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 import dayjs from 'dayjs';
 import { DeleteOutlined } from '@ant-design/icons';
 import { formatCurrency } from '../utils/format';
+import { isBrowser } from '../utils/browser';
 
 const { RangePicker } = DatePicker;
 
@@ -34,7 +35,7 @@ const Sales: React.FC = () => {
   const [form] = Form.useForm();
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
   const { products, sales, loading, fetchProducts, fetchSales, subscribeToSales } = useStore();
-  const [isBrowser, setIsBrowser] = useState(false);
+  const [isBrowserEnv, setIsBrowserEnv] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [user, setUser] = useState<{id: string, email?: string} | null>(null);
   const [searchText, setSearchText] = useState('');
@@ -57,7 +58,12 @@ const Sales: React.FC = () => {
     getCurrentUser();
     fetchData();
     const unsubscribe = subscribeToSales();
-    setIsBrowser(typeof window !== 'undefined');
+    
+    // Hanya set isBrowser di client-side untuk menghindari error di server
+    if (isBrowser()) {
+      setIsBrowserEnv(true);
+    }
+    
     return () => {
       if (typeof unsubscribe === 'function') {
         unsubscribe();
@@ -217,7 +223,7 @@ const Sales: React.FC = () => {
     }
   };
 
-  const isMobile = isBrowser && window.innerWidth <= 768;
+  const isMobile = isBrowser() && window.innerWidth <= 768;
 
   const columns: ColumnsType<Sale> = [
     {
@@ -231,14 +237,14 @@ const Sales: React.FC = () => {
       title: 'Pelanggan',
       dataIndex: 'customer_name',
       key: 'customer_name',
-      ellipsis: isMobile,
+      ellipsis: isBrowserEnv && isMobile,
     },
     {
       title: 'Produk',
       dataIndex: 'products',
       key: 'product',
       render: (products: ProductInfo | undefined) => products?.name || '-',
-      ellipsis: isMobile,
+      ellipsis: isBrowserEnv && isMobile,
     },
     {
       title: 'Kuantitas',
@@ -284,7 +290,7 @@ const Sales: React.FC = () => {
   return (
     <div className="animate-fadeIn">
       <Card className="hover:shadow-lg transition-shadow duration-300">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
           <Space className="flex-wrap animate-slideInLeft mobile-full-width" style={{ width: '100%' }}>
             <RangePicker 
               className="w-full transition-all mobile-full-width" 
@@ -308,22 +314,19 @@ const Sales: React.FC = () => {
         </div>
         <div className="overflow-x-auto animate-slideUp">
           <Table
-            columns={columns}
+            columns={columns.map(col => ({
+              ...col,
+              ellipsis: isBrowserEnv && isMobile,
+            }))}
             dataSource={filteredSales}
             rowKey="id"
             loading={loading}
             className="min-w-full"
-            scroll={{ x: true }}
-            rowClassName={(_, index) => 
-              index % 2 === 0 ? 'bg-gray-50 hover:bg-blue-50 transition-colors' : 'hover:bg-blue-50 transition-colors'
-            }
             pagination={{
-              responsive: true,
-              showSizeChanger: true,
-              defaultPageSize: isMobile ? 5 : 10,
-              pageSizeOptions: isMobile ? ['5', '10', '20'] : ['10', '20', '50'],
-              showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total} penjualan`,
-              size: isMobile ? 'small' : 'default'
+              pageSize: isMobile ? 5 : 10,
+              showSizeChanger: !isMobile,
+              pageSizeOptions: isMobile ? ['5', '10'] : ['10', '20', '50'],
+              showTotal: (total) => `Total ${total} penjualan`,
             }}
           />
         </div>
