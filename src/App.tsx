@@ -1,22 +1,18 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { ConfigProvider } from 'antd';
+import { ConfigProvider, Spin } from 'antd';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import Sales from './pages/Sales';
 import Reports from './pages/Reports';
 import LoginPage from './pages/LoginPage';
+import ErrorPage from './pages/ErrorPage';
+import GlobalNotification from './components/common/GlobalNotification';
 import id_ID from 'antd/lib/locale/id_ID';
 import { supabase } from './lib/supabase';
 import { useStore } from './lib/store';
-
-const theme = {
-  token: {
-    colorPrimary: '#3b82f6',
-    borderRadius: 8,
-  },
-};
+import { theme as appTheme } from './lib/theme';
 
 // Route yang memerlukan autentikasi
 const ProtectedRoute = () => {
@@ -69,14 +65,17 @@ function App() {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center">
-        <div className="text-xl animate-pulse">Loading...</div>
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-blue-50">
+        <img src="/src/assets/logo.svg" alt="IPUR CUYUNK" className="w-16 h-16 mb-4" />
+        <Spin size="large" />
+        <div className="mt-4 text-blue-600 font-medium">Memuat aplikasi...</div>
       </div>
     );
   }
 
   return (
-    <ConfigProvider theme={theme} locale={id_ID}>
+    <ConfigProvider theme={appTheme} locale={id_ID}>
+      <GlobalNotification />
       <Router>
         <Routes>
           {/* Halaman login sebagai rute publik */}
@@ -90,8 +89,11 @@ function App() {
             <Route path="/reports" element={<Reports />} />
           </Route>
 
-          {/* Rute default redirect ke login */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          {/* Halaman Error 404 untuk rute yang tidak ditemukan */}
+          <Route path="/404" element={<ErrorPage />} />
+          
+          {/* Rute default redirect ke halaman 404 jika tidak ditemukan */}
+          <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
       </Router>
     </ConfigProvider>

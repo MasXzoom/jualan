@@ -28,6 +28,15 @@ export interface Sale {
   };
 }
 
+// Tipe untuk notifikasi
+type NotificationType = 'success' | 'error' | 'info' | 'warning';
+type NotificationFunction = (
+  type: NotificationType, 
+  message: string, 
+  description?: string, 
+  duration?: number
+) => void;
+
 interface StoreState {
   products: Product[];
   sales: Sale[];
@@ -35,6 +44,8 @@ interface StoreState {
   loading: boolean;
   error: string | null;
   userId: string | null;
+  notifications: {type: NotificationType, message: string, description?: string}[];
+  addNotification: (notifyFn: NotificationFunction) => void;
   setUserId: (id: string | null) => void;
   fetchProducts: () => Promise<void>;
   fetchSales: () => Promise<void>;
@@ -49,6 +60,23 @@ export const useStore = create<StoreState>((set, get) => ({
   loading: false,
   error: null,
   userId: null,
+  notifications: [],
+  
+  // Fungsi untuk menambahkan notifikasi
+  addNotification: (notifyFn: NotificationFunction) => {
+    const originalNotify = notifyFn;
+    set({ 
+      addNotification: (type, message, description, duration) => {
+        originalNotify(type, message, description, duration);
+        set(state => ({
+          notifications: [
+            ...state.notifications,
+            { type, message, description }
+          ].slice(-5) // Hanya simpan 5 notifikasi terakhir
+        }));
+      }
+    });
+  },
   
   setUserId: (id: string | null) => set({ userId: id }),
 

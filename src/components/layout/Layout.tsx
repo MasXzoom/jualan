@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Layout as AntLayout, Button } from 'antd';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import Footer from './Footer';
 import { Menu } from 'lucide-react';
 
 const { Content } = AntLayout;
@@ -43,6 +44,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             {children}
           </div>
         </Content>
+        <Footer />
       </AntLayout>
     </AntLayout>
   );
