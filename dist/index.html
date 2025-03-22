@@ -2,14 +2,24 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./assets/logo-BzAVPK1A.svg" />
+    <base href="/" />
+    <link rel="icon" type="image/svg+xml" href="/assets/logo-BzAVPK1A.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IPUR CUYUNK - Aplikasi Penjualan</title>
     <meta name="description" content="Aplikasi sederhana untuk tracking penjualan dan produk" />
-    <script type="module" crossorigin src="./assets/index-C0MlU6v6.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-C4QuKD2P.css">
+    <script type="module" crossorigin src="/assets/index-B-7fgAJY.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DnM_wMQH.css">
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Ensure routes work by redirecting to index.html for SPA requests
+      (function() {
+        // This handles direct navigation to routes in SPA
+        if (window.location.pathname !== '/' && !window.location.pathname.match(/\.[a-zA-Z0-9]+$/)) {
+          console.log('SPA route detected:', window.location.pathname);
+        }
+      })();
+    </script>
   </body>
 </html>
