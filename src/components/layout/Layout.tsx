@@ -4,10 +4,11 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import Footer from './Footer';
 import { Menu } from 'lucide-react';
+import { Outlet } from 'react-router-dom';
 
 const { Content } = AntLayout;
 
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const Layout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -41,7 +42,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="block md:hidden h-[50px]"></div>
         <Content className="p-4 md:p-6 overflow-auto bg-gray-50">
           <div className="max-w-[1200px] mx-auto">
-            {children}
+            <Outlet />
           </div>
         </Content>
         <Footer />
