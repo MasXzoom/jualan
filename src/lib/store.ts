@@ -12,12 +12,7 @@ interface Product {
   user_id?: string;
 }
 
-interface ProductInfo {
-  name: string;
-  price: number;
-}
-
-interface Sale {
+export interface Sale {
   id: string;
   date: string;
   customer_name: string | null;
@@ -27,7 +22,10 @@ interface Sale {
   status: string;
   created_at: string;
   user_id?: string;
-  products?: ProductInfo;
+  products?: {
+    name: string;
+    price: number;
+  };
 }
 
 interface StoreState {

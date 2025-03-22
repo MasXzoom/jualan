@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Card, Button, Input, Space, Tag, Modal, Form, InputNumber, message, Popconfirm } from 'antd';
+import { Card, Button, Input, Tag, Modal, Form, InputNumber, message, Popconfirm, Empty } from 'antd';
 import { Plus, Search, Edit2, Trash2 } from 'lucide-react';
 import { useStore } from '../lib/store';
 import { supabase } from '../lib/supabase';
@@ -141,72 +141,6 @@ const Products = () => {
     }
   };
 
-  const columns = [
-    {
-      title: 'Nama Produk',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: (a: Product, b: Product) => a.name.localeCompare(b.name),
-    },
-    {
-      title: 'Deskripsi',
-      dataIndex: 'description',
-      key: 'description',
-    },
-    {
-      title: 'Harga',
-      dataIndex: 'price',
-      key: 'price',
-      render: (price: number) => formatCurrency(price),
-      sorter: (a: Product, b: Product) => a.price - b.price,
-    },
-    {
-      title: 'Stok',
-      dataIndex: 'stock',
-      key: 'stock',
-      sorter: (a: Product, b: Product) => a.stock - b.stock,
-      render: (stock: number) => (
-        <Tag color={stock > 10 ? 'green' : 'orange'}>
-          {stock}
-        </Tag>
-      ),
-    },
-    {
-      title: 'Aksi',
-      key: 'actions',
-      render: (_: unknown, record: Product) => (
-        <Space>
-          <Button 
-            type="text" 
-            icon={<Edit2 className="w-4 h-4" />}
-            className="text-blue-600 hover:text-blue-800"
-            onClick={() => {
-              setEditingId(record.id);
-              form.setFieldsValue(record);
-              setIsModalVisible(true);
-            }}
-          >
-            Edit
-          </Button>
-          <Popconfirm
-            title="Yakin ingin menghapus produk ini?"
-            onConfirm={() => handleDelete(record.id)}
-            okText="Ya"
-            cancelText="Tidak"
-          >
-            <Button 
-              type="text" 
-              icon={<Trash2 className="w-4 h-4" />}
-              className="text-red-600 hover:text-red-800"
-            >
-              Hapus
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
-
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchText.toLowerCase()) ||
     (product.description && product.description.toLowerCase().includes(searchText.toLowerCase()))
@@ -238,28 +172,69 @@ const Products = () => {
           </Button>
         </div>
         <div className="overflow-x-auto animate-slideUp">
-          <Table
-            columns={columns.map(col => ({
-              ...col,
-              ellipsis: isBrowser && window.innerWidth < 768,
-            }))}
-            dataSource={filteredProducts as Product[]}
-            rowKey="id"
-            loading={loading}
-            className="min-w-full"
-            scroll={{ x: true }}
-            rowClassName={(_, index) => 
-              index % 2 === 0 ? 'bg-gray-50 hover:bg-blue-50 transition-colors' : 'hover:bg-blue-50 transition-colors'
-            }
-            pagination={{
-              responsive: true,
-              showSizeChanger: true,
-              defaultPageSize: isBrowser && window.innerWidth < 768 ? 5 : 10,
-              pageSizeOptions: isBrowser && window.innerWidth < 768 ? ['5', '10', '20'] : ['10', '20', '50'],
-              showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total} produk`,
-              size: isBrowser && window.innerWidth < 768 ? 'small' : 'default'
-            }}
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {loading ? (
+              Array(8).fill(0).map((_, i) => (
+                <Card key={i} loading className="hover:shadow-lg transition-shadow duration-300 rounded-xl" />
+              ))
+            ) : filteredProducts.length === 0 ? (
+              <div className="col-span-full text-center py-10">
+                <Empty description="Tidak ada produk yang sesuai dengan pencarian" />
+              </div>
+            ) : (
+              filteredProducts.map((product) => (
+                <Card 
+                  key={product.id}
+                  className="hover:shadow-lg transition-all duration-300 border-t-4 border-t-blue-500 rounded-xl overflow-hidden"
+                  actions={[
+                    <Button 
+                      key="edit"
+                      type="text" 
+                      icon={<Edit2 className="w-4 h-4" />}
+                      className="text-blue-600 hover:text-blue-800"
+                      onClick={() => {
+                        setEditingId(product.id);
+                        form.setFieldsValue(product);
+                        setIsModalVisible(true);
+                      }}
+                    >
+                      Edit
+                    </Button>,
+                    <Popconfirm
+                      key="delete"
+                      title="Yakin ingin menghapus produk ini?"
+                      onConfirm={() => handleDelete(product.id)}
+                      okText="Ya"
+                      cancelText="Tidak"
+                    >
+                      <Button 
+                        type="text" 
+                        icon={<Trash2 className="w-4 h-4" />}
+                        className="text-red-600 hover:text-red-800"
+                      >
+                        Hapus
+                      </Button>
+                    </Popconfirm>
+                  ]}
+                >
+                  <div className="flex flex-col h-full">
+                    <div className="mb-4">
+                      <h3 className="text-lg font-medium text-gray-800">{product.name}</h3>
+                      <p className="text-gray-500 line-clamp-2 h-10 text-sm">{product.description || 'Tidak ada deskripsi'}</p>
+                    </div>
+                    <div className="mt-auto">
+                      <div className="flex justify-between items-center">
+                        <span className="text-lg font-semibold text-blue-600">{formatCurrency(product.price)}</span>
+                        <Tag color={product.stock > 10 ? 'green' : 'orange'} className="ml-2">
+                          Stok: {product.stock}
+                        </Tag>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
+          </div>
         </div>
       </Card>
 

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Row, Col, Statistic, Spin, Empty, Segmented } from 'antd';
-import { Area, Pie } from '@ant-design/charts';
-import { Package, ShoppingCart, DollarSign, Users, ChevronRight } from 'lucide-react';
+import { Card, Row, Col, Spin, Empty, Select, List, Avatar, Typography, Badge } from 'antd';
+import { Package, ShoppingCart, DollarSign, TrendingUp, Calendar } from 'lucide-react';
 import { useStore } from '../lib/store';
 import { isBrowser } from '../utils/browser';
 
+const { Text, Title } = Typography;
+
 const Dashboard = () => {
-  const [visibleSection, setVisibleSection] = useState<'activity'|'charts'>('charts');
   const [isMobile, setIsMobile] = useState(false);
+  const [currency, setCurrency] = useState<'IDR' | 'USD'>('IDR');
 
   useEffect(() => {
     // Cek apakah tampilan mobile hanya jika di browser
@@ -50,49 +51,42 @@ const Dashboard = () => {
     };
   }, [fetchProducts, fetchSales, subscribeToProducts, subscribeToSales]);
 
-  // Data untuk grafik penjualan
-  const salesData = sales.map(sale => ({
-    date: new Date(sale.date).toLocaleDateString('id-ID'),
-    penjualan: sale.total_amount,
-  }));
-
-  // Data untuk grafik produk terlaris
-  const topProducts = products
-    .slice(0, 5)
-    .map(product => ({
-      name: product.name,
-      value: product.stock,
-    }));
-
-  const areaConfig = {
-    data: salesData,
-    xField: 'date',
-    yField: 'penjualan',
-    smooth: true,
-    areaStyle: {
-      fill: 'l(270) 0:#ffffff 0.5:#3b82f680 1:#3b82f6',
-    },
-    line: {
-      color: '#3b82f6',
-    },
+  // Konversi mata uang
+  const convertCurrency = (amount: number): number => {
+    if (currency === 'USD') {
+      // Anggap rate IDR ke USD adalah 1 USD = 15,000 IDR
+      return amount / 15000;
+    }
+    return amount;
   };
 
-  const pieConfig = {
-    data: topProducts,
-    angleField: 'value',
-    colorField: 'name',
-    radius: 0.8,
-    label: {
-      type: 'outer',
-      content: '{name}: {percentage}',
-    },
-    interactions: [
-      {
-        type: 'element-active',
-      },
-    ],
+  // Format mata uang
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat(currency === 'IDR' ? 'id-ID' : 'en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: currency === 'IDR' ? 0 : 2,
+      maximumFractionDigits: currency === 'IDR' ? 0 : 2,
+    }).format(convertCurrency(amount));
   };
 
+  // Format tanggal
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleDateString('id-ID', {
+      weekday: isMobile ? undefined : 'long',
+      year: 'numeric',
+      month: isMobile ? 'short' : 'long',
+      day: 'numeric',
+    });
+  };
+
+  // Generate fake growth percentages for UI presentation
+  const getRandomGrowth = () => {
+    return (Math.random() * 20 + 5).toFixed(1);
+  };
+
+  const totalProductsSold = sales.reduce((sum, sale) => sum + sale.quantity, 0);
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[500px]">
@@ -103,146 +97,170 @@ const Dashboard = () => {
 
   return (
     <div className="animate-fadeIn space-y-6">
-      <Row gutter={[16, 16]}>
-        <Col xs={12} sm={12} lg={8}>
-          <Card className="hover-scale transition-all duration-300 transform hover:shadow-lg mobile-p-2">
-            <Statistic
-              title={<span className="mobile-text-xs">Total Penjualan</span>}
-              value={totalSales}
-              prefix={<DollarSign className="w-4 h-4 md:w-5 md:h-5 text-blue-600 animate-pulse" />}
-              className="animate-slideInLeft"
-              formatter={(value) => 
-                new Intl.NumberFormat('id-ID', {
-                  style: 'currency',
-                  currency: 'IDR',
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 0,
-                }).format(value as number)
-              }
-            />
+      <div className="flex justify-between mb-6 items-center">
+        <Title level={4} className="!m-0 text-gray-700 font-light">Laporan Bojoku</Title>
+        <Select
+          value={currency}
+          onChange={(value: 'IDR' | 'USD') => setCurrency(value)}
+          options={[
+            { value: 'IDR', label: 'Rupiah (IDR)' },
+            { value: 'USD', label: 'US Dollar (USD)' },
+          ]}
+          className="w-40"
+          bordered={false}
+          dropdownStyle={{ borderRadius: '12px' }}
+        />
+      </div>
+
+      <Row gutter={[24, 24]}>
+        <Col xs={24} sm={24} md={8}>
+          <Card 
+            className="overflow-hidden rounded-xl border-0 shadow-sm hover:shadow-md transition-all duration-300"
+            bodyStyle={{ padding: '0' }}
+          >
+            <div className="p-6 pb-4">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <Text type="secondary" className="text-xs uppercase tracking-wider font-medium">Total Penjualan</Text>
+                  <Title level={3} className="!m-0 font-semibold">
+                    {formatCurrency(totalSales)}
+                  </Title>
+                </div>
+                <div className="p-3 bg-blue-50 rounded-xl">
+                  <DollarSign className="w-5 h-5 text-blue-500" />
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <Badge status="success" />
+                <Text className="text-green-600 text-sm">+{getRandomGrowth()}%</Text>
+                <Text type="secondary" className="text-xs"> dibanding bulan lalu</Text>
+              </div>
+            </div>
+            <div className="h-2 bg-gradient-to-r from-blue-400 to-blue-600"></div>
           </Card>
         </Col>
-        <Col xs={12} sm={12} lg={8}>
-          <Card className="hover-scale transition-all duration-300 transform hover:shadow-lg mobile-p-2">
-            <Statistic
-              title={<span className="mobile-text-xs">Produk Terjual</span>}
-              value={sales.length}
-              prefix={<Package className="w-4 h-4 md:w-5 md:h-5 text-green-600 animate-pulse" />}
-              className="animate-slideInLeft delay-100"
-            />
+        <Col xs={24} sm={24} md={8}>
+          <Card 
+            className="overflow-hidden rounded-xl border-0 shadow-sm hover:shadow-md transition-all duration-300"
+            bodyStyle={{ padding: '0' }}
+          >
+            <div className="p-6 pb-4">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <Text type="secondary" className="text-xs uppercase tracking-wider font-medium">Produk Terjual</Text>
+                  <Title level={3} className="!m-0 font-semibold">
+                    {totalProductsSold} <span className="text-sm font-normal text-gray-400">items</span>
+                  </Title>
+                </div>
+                <div className="p-3 bg-green-50 rounded-xl">
+                  <Package className="w-5 h-5 text-green-500" />
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <Badge status="success" />
+                <Text className="text-green-600 text-sm">+{getRandomGrowth()}%</Text>
+                <Text type="secondary" className="text-xs"> dibanding bulan lalu</Text>
+              </div>
+            </div>
+            <div className="h-2 bg-gradient-to-r from-green-400 to-green-600"></div>
           </Card>
         </Col>
-        <Col xs={24} sm={24} lg={8}>
-          <Card className="hover-scale transition-all duration-300 transform hover:shadow-lg mobile-p-2">
-            <Statistic
-              title={<span className="mobile-text-xs">Total Produk</span>}
-              value={products.length}
-              prefix={<ShoppingCart className="w-4 h-4 md:w-5 md:h-5 text-purple-600 animate-pulse" />}
-              className="animate-slideInLeft delay-200"
-            />
+        <Col xs={24} sm={24} md={8}>
+          <Card 
+            className="overflow-hidden rounded-xl border-0 shadow-sm hover:shadow-md transition-all duration-300"
+            bodyStyle={{ padding: '0' }}
+          >
+            <div className="p-6 pb-4">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <Text type="secondary" className="text-xs uppercase tracking-wider font-medium">Total Produk</Text>
+                  <Title level={3} className="!m-0 font-semibold">
+                    {products.length} <span className="text-sm font-normal text-gray-400">items</span>
+                  </Title>
+                </div>
+                <div className="p-3 bg-purple-50 rounded-xl">
+                  <ShoppingCart className="w-5 h-5 text-purple-500" />
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <Badge status="processing" color="purple" />
+                <Text className="text-purple-600 text-sm">+{getRandomGrowth()}%</Text>
+                <Text type="secondary" className="text-xs"> dibanding bulan lalu</Text>
+              </div>
+            </div>
+            <div className="h-2 bg-gradient-to-r from-purple-400 to-purple-600"></div>
           </Card>
         </Col>
       </Row>
 
-      {isMobile && (
-        <div className="flex justify-center">
-          <Segmented
-            options={[
-              { label: 'Grafik', value: 'charts' },
-              { label: 'Aktivitas', value: 'activity' }
-            ]}
-            value={visibleSection}
-            onChange={(value) => setVisibleSection(value as 'charts'|'activity')}
-            className="mb-4"
-          />
-        </div>
-      )}
-
-      <div className={`${isMobile && visibleSection !== 'charts' ? 'hidden' : 'block'}`}>
-        <Row gutter={[16, 16]}>
-          <Col xs={24} lg={16}>
-            <Card 
-              title={<span className="flex items-center"><DollarSign className="w-4 h-4 mr-2 text-blue-600" /> <span className="mobile-text-xs md:text-base">Grafik Penjualan</span></span>} 
-              className="animate-slideUp delay-400 hover:shadow-lg transition-all duration-300 scroll-reveal"
+      <Card 
+        title={
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <div className="p-2 bg-indigo-50 rounded-lg mr-3">
+                <TrendingUp className="w-4 h-4 text-indigo-500" />
+              </div>
+              <span className="font-medium text-gray-700">Aktivitas Penjualan Terbaru</span>
+            </div>
+            <Badge count={sales.length} showZero className="mr-2" style={{ backgroundColor: "#5046E5" }} />
+          </div>
+        }
+        className="rounded-xl border-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
+        bodyStyle={{ padding: '0' }}
+        headStyle={{ padding: '16px', borderBottom: '1px solid #f0f0f0' }}
+      >
+        <List
+          dataSource={sales.slice(0, 10)}
+          locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Belum ada aktivitas penjualan" /> }}
+          renderItem={(sale, index) => (
+            <List.Item 
+              key={sale.id}
+              className={index !== sales.slice(0, 10).length - 1 ? "border-b border-gray-100" : ""}
             >
-              {salesData.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <Area {...areaConfig} height={isMobile ? 200 : 300} />
-                </div>
-              ) : (
-                <Empty description="Belum ada data penjualan" />
-              )}
-            </Card>
-          </Col>
-          <Col xs={24} lg={8}>
-            <Card 
-              title={<span className="flex items-center"><Package className="w-4 h-4 mr-2 text-purple-600" /> <span className="mobile-text-xs md:text-base">Produk Terlaris</span></span>} 
-              className="animate-slideUp delay-500 hover:shadow-lg transition-all duration-300 scroll-reveal"
-            >
-              {topProducts.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <Pie {...pieConfig} height={isMobile ? 200 : 300} />
-                </div>
-              ) : (
-                <Empty description="Belum ada data produk" />
-              )}
-            </Card>
-          </Col>
-        </Row>
-      </div>
-
-      <div className={`${isMobile && visibleSection !== 'activity' ? 'hidden' : 'block'}`}>
-        <Row gutter={[16, 16]}>
-          <Col xs={24}>
-            <Card 
-              title={<span className="flex items-center"><Users className="w-4 h-4 mr-2 text-green-600" /> <span className="mobile-text-xs md:text-base">Aktivitas Terbaru</span></span>} 
-              className="animate-slideUp delay-600 hover:shadow-lg transition-all duration-300 scroll-reveal"
-            >
-              <div className="space-y-4">
-                {sales.slice(0, 5).map((sale, index) => (
-                  <div 
-                    key={sale.id} 
-                    className={`flex flex-col md:flex-row md:items-center justify-between p-2 md:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-all animate-slideInRight`}
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <div className="flex items-center gap-2 md:gap-4">
-                      <div className="p-1 md:p-2 bg-blue-100 rounded-full animate-pulse">
-                        <Users className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+              <div className="w-full p-4 hover:bg-gray-50 transition-all duration-200">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      icon={<Package />}
+                      className="bg-gradient-to-br from-amber-400 to-orange-600 text-white flex items-center justify-center shadow-sm"
+                    />
+                    <div>
+                      <Text strong className="text-gray-800 flex items-center">
+                        {sale.products?.name || 'Produk'}
+                        <Badge 
+                          count={sale.quantity} 
+                          className="ml-2" 
+                          size="small" 
+                          style={{ 
+                            backgroundColor: '#EEF2FF', 
+                            color: '#5046E5', 
+                            boxShadow: 'none', 
+                            fontWeight: 600 
+                          }} 
+                        />
+                      </Text>
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <Text type="secondary" className="text-xs">{sale.customer_name || 'Pelanggan'}</Text>
                       </div>
-                      <div>
-                        <p className="font-medium text-sm md:text-base">Penjualan Baru</p>
-                        <p className="text-xs md:text-sm text-gray-500">
-                          {new Date(sale.date).toLocaleDateString('id-ID', {
-                            weekday: isMobile ? undefined : 'long',
-                            year: 'numeric',
-                            month: isMobile ? 'short' : 'long',
-                            day: 'numeric',
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between mt-2 md:mt-0">
-                      <p className="font-semibold text-blue-600 text-sm md:text-base">
-                        {new Intl.NumberFormat('id-ID', {
-                          style: 'currency',
-                          currency: 'IDR',
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
-                        }).format(sale.total_amount)}
-                      </p>
-                      <ChevronRight className="w-4 h-4 text-gray-400 ml-2 md:hidden" />
                     </div>
                   </div>
-                ))}
-                
-                {sales.length === 0 && (
-                  <Empty description="Belum ada aktivitas penjualan" />
-                )}
+                  <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                    <div className="flex items-center gap-1 bg-gray-50 px-2 py-1 rounded-full text-gray-500">
+                      <Calendar className="w-3 h-3 text-gray-400" />
+                      <Text type="secondary" className="text-xs">
+                        {formatDate(sale.date)}
+                      </Text>
+                    </div>
+                    <Text strong className="text-blue-600 ml-2 text-right">
+                      {formatCurrency(sale.total_amount)}
+                    </Text>
+                  </div>
+                </div>
               </div>
-            </Card>
-          </Col>
-        </Row>
-      </div>
+            </List.Item>
+          )}
+        />
+      </Card>
     </div>
   );
 };

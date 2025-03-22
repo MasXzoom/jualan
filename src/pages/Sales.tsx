@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Card, Table, Button, DatePicker, Space, Tag, Modal, Form, Select, InputNumber, Input, message, Popconfirm } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Card, Button, DatePicker, Space, Tag, Modal, Form, Select, InputNumber, Input, message, Popconfirm, Empty } from 'antd';
 import { Plus } from 'lucide-react';
 import { useStore } from '../lib/store';
 import { supabase } from '../lib/supabase';
@@ -234,68 +233,6 @@ const Sales: React.FC = () => {
 
   const isMobile = isBrowser() && window.innerWidth <= 768;
 
-  const columns: ColumnsType<Sale> = [
-    {
-      title: 'Tanggal',
-      dataIndex: 'date',
-      key: 'date',
-      render: (date: string) => dayjs(date).format('DD/MM/YYYY'),
-      sorter: (a: Sale, b: Sale) => dayjs(a.date).unix() - dayjs(b.date).unix(),
-    },
-    {
-      title: 'Pelanggan',
-      dataIndex: 'customer_name',
-      key: 'customer_name',
-      ellipsis: isBrowserEnv && isMobile,
-    },
-    {
-      title: 'Produk',
-      dataIndex: 'products',
-      key: 'product',
-      render: (products: ProductInfo | undefined) => products?.name || '-',
-      ellipsis: isBrowserEnv && isMobile,
-    },
-    {
-      title: 'Kuantitas',
-      dataIndex: 'quantity',
-      key: 'quantity',
-      responsive: ['md'],
-    },
-    {
-      title: 'Total',
-      dataIndex: 'total_amount',
-      key: 'total_amount',
-      render: (amount: number) => formatCurrency(amount),
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      render: (status: string) => getStatusTag(status),
-    },
-    {
-      title: 'Aksi',
-      key: 'action',
-      render: (_: unknown, record: Sale) => (
-        <Popconfirm
-          title="Yakin ingin menghapus penjualan ini?"
-          onConfirm={() => handleDelete(record.id)}
-          okText="Ya"
-          cancelText="Tidak"
-        >
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            size={isMobile ? 'small' : 'middle'}
-            loading={isDeleting}
-          >
-            {!isMobile && 'Hapus'}
-          </Button>
-        </Popconfirm>
-      ),
-    },
-  ];
-
   return (
     <div className="animate-fadeIn">
       <Card className="hover:shadow-lg transition-shadow duration-300">
@@ -322,22 +259,62 @@ const Sales: React.FC = () => {
           </Button>
         </div>
         <div className="overflow-x-auto animate-slideUp">
-          <Table
-            columns={columns.map(col => ({
-              ...col,
-              ellipsis: isBrowserEnv && isMobile,
-            }))}
-            dataSource={filteredSales as readonly Sale[]}
-            rowKey="id"
-            loading={loading}
-            className="min-w-full"
-            pagination={{
-              pageSize: isMobile ? 5 : 10,
-              showSizeChanger: !isMobile,
-              pageSizeOptions: isMobile ? ['5', '10'] : ['10', '20', '50'],
-              showTotal: (total) => `Total ${total} penjualan`,
-            }}
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {loading ? (
+              Array(8).fill(0).map((_, i) => (
+                <Card key={i} loading className="hover:shadow-lg transition-shadow duration-300 rounded-xl" />
+              ))
+            ) : filteredSales.length === 0 ? (
+              <div className="col-span-full text-center py-10">
+                <Empty description="Tidak ada penjualan yang sesuai dengan pencarian" />
+              </div>
+            ) : (
+              filteredSales.map((sale) => (
+                <Card 
+                  key={sale.id}
+                  className="hover:shadow-lg transition-all duration-300 border-t-4 border-t-indigo-500 rounded-xl overflow-hidden"
+                  actions={[
+                    <Popconfirm
+                      key="delete"
+                      title="Yakin ingin menghapus penjualan ini?"
+                      onConfirm={() => handleDelete(sale.id)}
+                      okText="Ya"
+                      cancelText="Tidak"
+                      disabled={isDeleting}
+                    >
+                      <Button 
+                        type="text" 
+                        icon={<DeleteOutlined />}
+                        className="text-red-600 hover:text-red-800"
+                        loading={isDeleting}
+                      >
+                        Hapus
+                      </Button>
+                    </Popconfirm>,
+                  ]}
+                >
+                  <div className="flex flex-col h-full">
+                    <div className="mb-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm text-gray-600">{dayjs(sale.date).format('DD/MM/YYYY')}</span>
+                        {getStatusTag(sale.status)}
+                      </div>
+                      <h3 className="text-lg font-medium text-gray-800">
+                        {sale.products?.name || 'Produk'}
+                        <Tag className="ml-2 bg-indigo-100 text-indigo-800 border-0">x{sale.quantity}</Tag>
+                      </h3>
+                      <p className="text-gray-500 text-sm">Pelanggan: {sale.customer_name}</p>
+                    </div>
+                    <div className="mt-auto pt-3 border-t border-gray-100">
+                      <div className="flex justify-between items-center">
+                        <span className="text-lg font-semibold text-indigo-600">{formatCurrency(sale.total_amount)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              ))
+            )}
+          </div>
         </div>
       </Card>
 
