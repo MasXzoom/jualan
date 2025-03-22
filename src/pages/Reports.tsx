@@ -506,7 +506,7 @@ const Reports = () => {
       const styleElement = document.createElement('style');
       styleElement.textContent = `
         .small-calendar-picker .ant-picker-panel-container {
-          max-width: 280px !important;
+          max-width: 340px !important;
         }
         .small-calendar-picker .ant-picker-panel {
           width: 100% !important;
@@ -516,28 +516,29 @@ const Reports = () => {
         .small-calendar-picker .ant-picker-body,
         .small-calendar-picker table {
           width: 100% !important;
-          font-size: 12px !important;
+          font-size: 14px !important;
         }
         .small-calendar-picker .ant-picker-cell {
-          padding: 1px 0 !important;
+          padding: 2px 0 !important;
         }
         .small-calendar-picker .ant-picker-content th {
-          height: 24px !important;
+          height: 28px !important;
         }
         .small-calendar-picker .ant-picker-cell-inner {
-          min-width: 22px !important;
-          height: 22px !important;
-          line-height: 22px !important;
+          min-width: 28px !important;
+          height: 28px !important;
+          line-height: 28px !important;
         }
         .small-calendar-picker .ant-picker-ranges {
           flex-direction: column !important;
           min-width: auto !important;
+          padding: 10px !important;
         }
         .small-calendar-picker .ant-picker-header {
-          padding: 0 4px !important;
+          padding: 0 8px !important;
         }
         .small-calendar-picker .ant-picker-header-view {
-          font-size: 12px !important;
+          font-size: 14px !important;
         }
         @media (max-width: 480px) {
           .ant-picker-dropdown {

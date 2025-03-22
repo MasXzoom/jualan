@@ -16,7 +16,8 @@ interface ProductInfo {
   price: number;
 }
 
-interface SaleType {
+// Gunakan type SaleType dalam deklarasi variabel sales dari useStore
+type SaleType = {
   id: string;
   date: string;
   customer_name: string;
@@ -27,13 +28,20 @@ interface SaleType {
   products?: ProductInfo;
   created_at: string;
   user_id?: string;
-}
+};
 
 const Sales: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
-  const { products, sales, loading, fetchProducts, fetchSales, subscribeToSales } = useStore();
+  const { products, sales, loading, fetchProducts, fetchSales, subscribeToSales } = useStore() as {
+    products: any[];
+    sales: SaleType[];
+    loading: boolean;
+    fetchProducts: () => void;
+    fetchSales: () => void;
+    subscribeToSales: () => any;
+  };
   const [submitting, setSubmitting] = useState(false);
   const [user, setUser] = useState<{id: string, email?: string} | null>(null);
   const [searchText, setSearchText] = useState('');
@@ -41,6 +49,62 @@ const Sales: React.FC = () => {
   
   // Mendeteksi apakah tampilan mobile atau tidak
   const isMobile = isBrowser() && window.innerWidth <= 768;
+
+  // Tambahkan CSS untuk membuat kalender lebih responsif di mobile
+  useEffect(() => {
+    if (isBrowser()) {
+      // Tambahkan styling untuk kalender popup
+      const styleElement = document.createElement('style');
+      styleElement.textContent = `
+        .small-calendar-picker .ant-picker-panel-container {
+          max-width: 340px !important;
+        }
+        .small-calendar-picker .ant-picker-panel {
+          width: 100% !important;
+        }
+        .small-calendar-picker .ant-picker-date-panel,
+        .small-calendar-picker .ant-picker-panel-container,
+        .small-calendar-picker .ant-picker-body,
+        .small-calendar-picker table {
+          width: 100% !important;
+          font-size: 14px !important;
+        }
+        .small-calendar-picker .ant-picker-cell {
+          padding: 2px 0 !important;
+        }
+        .small-calendar-picker .ant-picker-content th {
+          height: 28px !important;
+        }
+        .small-calendar-picker .ant-picker-cell-inner {
+          min-width: 28px !important;
+          height: 28px !important;
+          line-height: 28px !important;
+        }
+        .small-calendar-picker .ant-picker-ranges {
+          flex-direction: column !important;
+          min-width: auto !important;
+          padding: 10px !important;
+        }
+        .small-calendar-picker .ant-picker-header {
+          padding: 0 8px !important;
+        }
+        .small-calendar-picker .ant-picker-header-view {
+          font-size: 14px !important;
+        }
+        @media (max-width: 480px) {
+          .ant-picker-dropdown {
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+          }
+        }
+      `;
+      document.head.appendChild(styleElement);
+      
+      return () => {
+        document.head.removeChild(styleElement);
+      };
+    }
+  }, []);
 
   const fetchData = useCallback(() => {
     fetchProducts();
@@ -243,6 +307,7 @@ const Sales: React.FC = () => {
               style={{ 
                 maxWidth: isMobile ? '100%' : 'auto'
               }}
+              popupClassName={isMobile ? "small-calendar-picker" : ""}
             />
             <Input
               placeholder="Cari pelanggan atau produk..."
