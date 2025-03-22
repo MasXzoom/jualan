@@ -12,6 +12,7 @@ import { Spin, message, ConfigProvider } from 'antd';
 import { theme, colorScheme } from './theme';
 import GlobalNotification from './components/common/GlobalNotification';
 import logoSvg from './assets/logo.svg';
+import Dashboard from './pages/Dashboard';
 
 console.log('App module loaded');
 
@@ -131,7 +132,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
           {/* Rute yang dilindungi, memerlukan autentikasi */}
           <Route element={<ProtectedRoute />}>
-            <Route path="/" element={<Reports />} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="/products" element={<Products />} />
             <Route path="/sales" element={<Sales />} />
             <Route path="/reports" element={<Reports />} />
