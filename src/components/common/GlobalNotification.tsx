@@ -23,13 +23,14 @@ const iconMap = {
 };
 
 const GlobalNotification: React.FC = () => {
-  const [api, contextHolder] = notification.useNotification();
+  const [notificationApi, contextHolder] = notification.useNotification();
   const [notificationsQueue, setNotificationsQueue] = useState<NotificationItem[]>([]);
   const addNotification = useStore(state => state.addNotification);
 
   // Mendaftarkan fungsi addNotification ke global store
   useEffect(() => {
     addNotification((type, message, description, duration = 4.5) => {
+      console.log('GlobalNotification: Adding to queue', type, message);
       setNotificationsQueue(prev => [...prev, { type, message, description, duration }]);
     });
   }, [addNotification]);
@@ -39,17 +40,62 @@ const GlobalNotification: React.FC = () => {
     if (notificationsQueue.length > 0) {
       const [currentNotification, ...restNotifications] = notificationsQueue;
       
-      api[currentNotification.type]({
-        message: currentNotification.message,
-        description: currentNotification.description,
-        duration: currentNotification.duration,
-        icon: iconMap[currentNotification.type],
-        className: 'global-notification-item'
-      });
+      console.log('GlobalNotification: Showing notification', currentNotification.type, currentNotification.message);
+      
+      // Metode yang benar untuk memanggil notification API
+      try {
+        switch(currentNotification.type) {
+          case 'success':
+            notificationApi.success({
+              message: currentNotification.message,
+              description: currentNotification.description,
+              duration: currentNotification.duration,
+              icon: iconMap.success,
+              className: 'global-notification-item'
+            });
+            break;
+          case 'error':
+            notificationApi.error({
+              message: currentNotification.message,
+              description: currentNotification.description,
+              duration: currentNotification.duration,
+              icon: iconMap.error,
+              className: 'global-notification-item'
+            });
+            break;
+          case 'info':
+            notificationApi.info({
+              message: currentNotification.message,
+              description: currentNotification.description,
+              duration: currentNotification.duration,
+              icon: iconMap.info,
+              className: 'global-notification-item'
+            });
+            break;
+          case 'warning':
+            notificationApi.warning({
+              message: currentNotification.message,
+              description: currentNotification.description,
+              duration: currentNotification.duration,
+              icon: iconMap.warning,
+              className: 'global-notification-item'
+            });
+            break;
+          default:
+            notificationApi.open({
+              message: currentNotification.message,
+              description: currentNotification.description,
+              duration: currentNotification.duration,
+              className: 'global-notification-item'
+            });
+        }
+      } catch (error) {
+        console.error('Error showing notification:', error);
+      }
       
       setNotificationsQueue(restNotifications);
     }
-  }, [api, notificationsQueue]);
+  }, [notificationApi, notificationsQueue]);
 
   return contextHolder;
 };

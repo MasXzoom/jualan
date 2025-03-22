@@ -3,15 +3,38 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-console.log('Starting application...');
+console.log('Starting application in', import.meta.env.MODE, 'mode');
 
-// Error boundary for entire app
+// Tangkap dan log semua error global
 window.addEventListener('error', (event) => {
-  console.error('Global error caught:', event.error);
+  console.error('[Global Error]:', event.error);
+  console.error('Message:', event.message);
+  console.error('Stack:', event.error?.stack);
+  
+  // Log error ke UI jika dalam development
+  if (import.meta.env.DEV) {
+    const errorDiv = document.createElement('div');
+    errorDiv.style.position = 'fixed';
+    errorDiv.style.bottom = '0';
+    errorDiv.style.left = '0';
+    errorDiv.style.right = '0';
+    errorDiv.style.padding = '10px';
+    errorDiv.style.background = 'rgba(255, 0, 0, 0.7)';
+    errorDiv.style.color = 'white';
+    errorDiv.style.zIndex = '9999';
+    errorDiv.textContent = `Error: ${event.message}`;
+    document.body.appendChild(errorDiv);
+    
+    // Hapus pesan error setelah 5 detik
+    setTimeout(() => {
+      document.body.removeChild(errorDiv);
+    }, 5000);
+  }
 });
 
 window.addEventListener('unhandledrejection', (event) => {
-  console.error('Unhandled promise rejection:', event.reason);
+  console.error('[Unhandled Promise Rejection]:', event.reason);
+  console.error('Stack:', event.reason?.stack);
 });
 
 const rootElement = document.getElementById('root');
@@ -25,9 +48,14 @@ if (!rootElement) {
     const root = createRoot(rootElement);
     
     root.render(
-      <StrictMode>
+      // Hanya gunakan StrictMode dalam development
+      import.meta.env.DEV ? (
+        <StrictMode>
+          <App />
+        </StrictMode>
+      ) : (
         <App />
-      </StrictMode>
+      )
     );
     
     console.log('React app mounted successfully');

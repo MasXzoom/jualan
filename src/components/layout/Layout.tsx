@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, ReactNode } from 'react';
 import { Layout as AntLayout, Button } from 'antd';
 import Sidebar from './Sidebar';
 import Header from './Header';
@@ -8,12 +8,19 @@ import { Outlet } from 'react-router-dom';
 
 const { Content } = AntLayout;
 
-const Layout: React.FC = () => {
+interface LayoutProps {
+  children?: ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
+
+  // Render the children directly if provided, otherwise use Outlet
+  const contentToRender = children || <Outlet />;
 
   return (
     <AntLayout className="min-h-screen">
@@ -42,7 +49,7 @@ const Layout: React.FC = () => {
         <div className="block md:hidden h-[50px]"></div>
         <Content className="p-4 md:p-6 overflow-auto bg-gray-50">
           <div className="max-w-[1200px] mx-auto">
-            <Outlet />
+            {contentToRender}
           </div>
         </Content>
         <Footer />

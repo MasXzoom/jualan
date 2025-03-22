@@ -1,5 +1,8 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { supabase } from './supabase';
+
+console.log('Initializing store...');
 
 interface Product {
   id: string;
@@ -53,132 +56,184 @@ interface StoreState {
   subscribeToSales: () => (() => void) | void;
 }
 
-export const useStore = create<StoreState>((set, get) => ({
-  products: [],
-  sales: [],
-  totalSales: 0,
-  loading: false,
-  error: null,
-  userId: null,
-  notifications: [],
-  
-  // Fungsi untuk menambahkan notifikasi
-  addNotification: (notifyFn: NotificationFunction) => {
-    const originalNotify = notifyFn;
-    set({ 
-      addNotification: (type, message, description, duration) => {
-        originalNotify(type, message, description, duration);
-        set(state => ({
-          notifications: [
-            ...state.notifications,
-            { type, message, description }
-          ].slice(-5) // Hanya simpan 5 notifikasi terakhir
-        }));
-      }
-    });
-  },
-  
-  setUserId: (id: string | null) => set({ userId: id }),
-
-  fetchProducts: async () => {
-    const userId = get().userId;
-    
-    // Jika belum login, tidak perlu fetch
-    if (!userId) {
-      set({ products: [] });
-      return;
-    }
-    
-    try {
-      set({ loading: true });
+export const useStore = create<StoreState>()(
+  persist(
+    (set, get) => ({
+      products: [],
+      sales: [],
+      totalSales: 0,
+      loading: false,
+      error: null,
+      userId: null,
+      notifications: [],
       
-      // Query tanpa filter user_id (karena mungkin kolom belum dibuat)
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      set({ products: data || [] });
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      set({ error: (error as Error).message });
-    } finally {
-      set({ loading: false });
-    }
-  },
-
-  fetchSales: async () => {
-    const userId = get().userId;
-    
-    // Jika belum login, tidak perlu fetch
-    if (!userId) {
-      set({ sales: [], totalSales: 0 });
-      return;
-    }
-    
-    try {
-      set({ loading: true });
+      // Fungsi untuk menambahkan notifikasi
+      addNotification: function(notifyFn: NotificationFunction) {
+        console.log('Initializing notification function');
+        const originalNotify = notifyFn;
+        
+        // Simpan referensi ke fungsi notifikasi asli
+        const notificationFunction: NotificationFunction = (type, message, description, duration) => {
+          console.log(`Adding notification: ${type} - ${message}`);
+          originalNotify(type, message, description, duration);
+          set(state => ({
+            notifications: [
+              ...state.notifications,
+              { type, message, description }
+            ].slice(-5) // Hanya simpan 5 notifikasi terakhir
+          }));
+        };
+        
+        // Update state dengan fungsi notifikasi yang sudah disiapkan
+        set({ addNotification: () => notificationFunction });
+      },
       
-      // Query tanpa filter user_id (karena mungkin kolom belum dibuat)
-      const { data, error } = await supabase
-        .from('sales')
-        .select(`
-          *,
-          products:product_id (name, price)
-        `)
-        .order('date', { ascending: false });
+      setUserId: (id: string | null) => {
+        console.log('Setting userId:', id ? id.substring(0, 8) + '...' : 'null');
+        set({ userId: id });
+      },
 
-      if (error) throw error;
-      set({ 
-        sales: data || [],
-        totalSales: data?.reduce((sum, sale) => sum + (sale.total_amount || 0), 0) || 0
-      });
-    } catch (error) {
-      console.error('Error fetching sales:', error);
-      set({ error: (error as Error).message });
-    } finally {
-      set({ loading: false });
+      fetchProducts: async () => {
+        const userId = get().userId;
+        
+        console.log('Fetching products, userId:', userId ? 'exists' : 'none');
+        
+        // Jika belum login, tidak perlu fetch
+        if (!userId) {
+          console.log('No userId, skipping products fetch');
+          set({ products: [] });
+          return;
+        }
+        
+        try {
+          set({ loading: true });
+          
+          // Query tanpa filter user_id (karena mungkin kolom belum dibuat)
+          const { data, error } = await supabase
+            .from('products')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (error) {
+            console.error('Supabase error fetching products:', error);
+            throw error;
+          }
+          
+          console.log(`Fetched ${data?.length || 0} products`);
+          set({ products: data || [] });
+        } catch (error) {
+          console.error('Error fetching products:', error);
+          set({ error: (error as Error).message });
+        } finally {
+          set({ loading: false });
+        }
+      },
+
+      fetchSales: async () => {
+        const userId = get().userId;
+        
+        console.log('Fetching sales, userId:', userId ? 'exists' : 'none');
+        
+        // Jika belum login, tidak perlu fetch
+        if (!userId) {
+          console.log('No userId, skipping sales fetch');
+          set({ sales: [], totalSales: 0 });
+          return;
+        }
+        
+        try {
+          set({ loading: true });
+          
+          // Query tanpa filter user_id (karena mungkin kolom belum dibuat)
+          const { data, error } = await supabase
+            .from('sales')
+            .select(`
+              *,
+              products:product_id (name, price)
+            `)
+            .order('date', { ascending: false });
+
+          if (error) {
+            console.error('Supabase error fetching sales:', error);
+            throw error;
+          }
+          
+          console.log(`Fetched ${data?.length || 0} sales`);
+          set({ 
+            sales: data || [],
+            totalSales: data?.reduce((sum, sale) => sum + (sale.total_amount || 0), 0) || 0
+          });
+        } catch (error) {
+          console.error('Error fetching sales:', error);
+          set({ error: (error as Error).message });
+        } finally {
+          set({ loading: false });
+        }
+      },
+
+      subscribeToProducts: () => {
+        const userId = get().userId;
+        if (!userId) {
+          console.log('No userId, skipping products subscription');
+          return;
+        }
+        
+        console.log('Subscribing to products changes');
+        const products = supabase
+          .channel('products_channel')
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'products' },
+            (payload) => {
+              console.log('Products change detected:', payload.eventType);
+              get().fetchProducts();
+            }
+          )
+          .subscribe();
+
+        return () => {
+          console.log('Unsubscribing from products changes');
+          supabase.removeChannel(products);
+        };
+      },
+
+      subscribeToSales: () => {
+        const userId = get().userId;
+        if (!userId) {
+          console.log('No userId, skipping sales subscription');
+          return;
+        }
+        
+        console.log('Subscribing to sales changes');
+        const sales = supabase
+          .channel('sales_channel')
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'sales' },
+            (payload) => {
+              console.log('Sales change detected:', payload.eventType);
+              get().fetchSales();
+            }
+          )
+          .subscribe();
+
+        return () => {
+          console.log('Unsubscribing from sales changes');
+          supabase.removeChannel(sales);
+        };
+      },
+    }),
+    {
+      name: 'ipur-cuyunk-storage',
+      partialize: (state) => ({ 
+        userId: state.userId 
+      }),
+      onRehydrateStorage: () => (state) => {
+        console.log('Store rehydrated with state:', state ? 'exists' : 'none');
+        if (state?.userId) {
+          console.log('Restored userId from storage:', state.userId.substring(0, 8) + '...');
+        }
+      },
     }
-  },
-
-  subscribeToProducts: () => {
-    const userId = get().userId;
-    if (!userId) return;
-    
-    const products = supabase
-      .channel('products_channel')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'products' },
-        () => {
-          get().fetchProducts();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(products);
-    };
-  },
-
-  subscribeToSales: () => {
-    const userId = get().userId;
-    if (!userId) return;
-    
-    const sales = supabase
-      .channel('sales_channel')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'sales' },
-        () => {
-          get().fetchSales();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(sales);
-    };
-  },
-}));
+  )
+);

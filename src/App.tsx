@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Products from './pages/Products';
 import Sales from './pages/Sales';
@@ -26,8 +26,12 @@ const ProtectedRoute = () => {
     return <Navigate to="/login" replace />;
   }
   
-  console.log('User authenticated, rendering protected content');
-  return <Layout />;
+  console.log('User authenticated, rendering Layout');
+  return (
+    <Layout>
+      <Outlet />
+    </Layout>
+  );
 };
 
 function App() {
@@ -126,12 +130,12 @@ function App() {
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<ProtectedRoute />}>
-              <Route index element={<Products />} />
+              <Route index element={<Reports />} />
               <Route path="products" element={<Products />} />
               <Route path="sales" element={<Sales />} />
               <Route path="reports" element={<Reports />} />
-              <Route path="*" element={<ErrorPage />} />
             </Route>
+            <Route path="*" element={<ErrorPage />} />
           </Routes>
         </div>
       </ConfigProvider>
