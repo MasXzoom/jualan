@@ -479,7 +479,7 @@ const Reports = () => {
                 maxWidth: isMobile ? '100%' : '320px'
               }}
               size={isMobile ? 'small' : 'middle'}
-              popupClassName="date-range-popup"
+              popupClassName={isMobile ? "small-calendar-picker" : ""}
               separator={isMobile ? "→" : "-"}
               inputReadOnly={true} // Mencegah keyboard mobile muncul, pengguna hanya menggunakan date picker
             />
@@ -498,6 +498,61 @@ const Reports = () => {
       </Card>
     );
   };
+
+  // Tambahkan CSS untuk membuat kalender lebih responsif di mobile
+  useEffect(() => {
+    if (isBrowser) {
+      // Tambahkan styling untuk kalender popup
+      const styleElement = document.createElement('style');
+      styleElement.textContent = `
+        .small-calendar-picker .ant-picker-panel-container {
+          max-width: 280px !important;
+        }
+        .small-calendar-picker .ant-picker-panel {
+          width: 100% !important;
+        }
+        .small-calendar-picker .ant-picker-date-panel,
+        .small-calendar-picker .ant-picker-panel-container,
+        .small-calendar-picker .ant-picker-body,
+        .small-calendar-picker table {
+          width: 100% !important;
+          font-size: 12px !important;
+        }
+        .small-calendar-picker .ant-picker-cell {
+          padding: 1px 0 !important;
+        }
+        .small-calendar-picker .ant-picker-content th {
+          height: 24px !important;
+        }
+        .small-calendar-picker .ant-picker-cell-inner {
+          min-width: 22px !important;
+          height: 22px !important;
+          line-height: 22px !important;
+        }
+        .small-calendar-picker .ant-picker-ranges {
+          flex-direction: column !important;
+          min-width: auto !important;
+        }
+        .small-calendar-picker .ant-picker-header {
+          padding: 0 4px !important;
+        }
+        .small-calendar-picker .ant-picker-header-view {
+          font-size: 12px !important;
+        }
+        @media (max-width: 480px) {
+          .ant-picker-dropdown {
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+          }
+        }
+      `;
+      document.head.appendChild(styleElement);
+      
+      return () => {
+        document.head.removeChild(styleElement);
+      };
+    }
+  }, [isBrowser]);
 
   // Render main content
   return (
