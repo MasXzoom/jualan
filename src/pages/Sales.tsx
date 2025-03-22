@@ -81,11 +81,19 @@ const Sales: React.FC = () => {
     
   // Filter berdasarkan teks pencarian
   const filteredSales = salesByDate.filter(sale =>
-    sale.customer_name.toLowerCase().includes(searchText.toLowerCase()) ||
+    (sale.customer_name?.toLowerCase().includes(searchText.toLowerCase()) || false) ||
     (sale.products && sale.products.name.toLowerCase().includes(searchText.toLowerCase()))
   );
 
-  const handleAddSale = async (values: any) => {
+  interface SaleFormValues {
+    product_id: string;
+    quantity: number;
+    date: string;
+    customer_name: string;
+    status: string;
+  }
+
+  const handleAddSale = async (values: SaleFormValues) => {
     setSubmitting(true);
     
     try {
@@ -147,9 +155,10 @@ const Sales: React.FC = () => {
       message.success('Penjualan berhasil ditambahkan');
       form.resetFields();
       setIsModalVisible(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding sale:', error);
-      message.error(error.message || 'Terjadi kesalahan');
+      const err = error as { message?: string };
+      message.error(err.message || 'Terjadi kesalahan');
     } finally {
       setSubmitting(false);
     }
@@ -318,7 +327,7 @@ const Sales: React.FC = () => {
               ...col,
               ellipsis: isBrowserEnv && isMobile,
             }))}
-            dataSource={filteredSales}
+            dataSource={filteredSales as readonly Sale[]}
             rowKey="id"
             loading={loading}
             className="min-w-full"

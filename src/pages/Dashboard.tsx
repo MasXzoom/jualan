@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Row, Col, Statistic, Spin, Empty, Button, Segmented } from 'antd';
+import { Card, Row, Col, Statistic, Spin, Empty, Segmented } from 'antd';
 import { Area, Pie } from '@ant-design/charts';
-import { TrendingUp, Package, ShoppingCart, DollarSign, Users, ChevronRight } from 'lucide-react';
+import { Package, ShoppingCart, DollarSign, Users, ChevronRight } from 'lucide-react';
 import { useStore } from '../lib/store';
-import { isBrowser, isMobileView } from '../utils/browser';
+import { isBrowser } from '../utils/browser';
 
 const Dashboard = () => {
   const [visibleSection, setVisibleSection] = useState<'activity'|'charts'>('charts');

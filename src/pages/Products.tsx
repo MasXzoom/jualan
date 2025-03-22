@@ -18,13 +18,6 @@ interface Product {
   user_id?: string;
 }
 
-interface ProductForm {
-  name: string;
-  description: string;
-  price: number | string;
-  stock: number | string;
-}
-
 // Fungsi parser kustom untuk InputNumber
 const priceParser = (value: string | undefined): number => {
   if (!value) return 0;
@@ -117,9 +110,10 @@ const Products = () => {
       form.resetFields();
       setEditingId(null);
       fetchProducts();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error adding/editing product:', error);
-      message.error(error.message || 'Terjadi kesalahan saat menambah/mengedit produk');
+      const err = error as { message?: string };
+      message.error(err.message || 'Terjadi kesalahan saat menambah/mengedit produk');
     } finally {
       setSubmitting(false);
     }
