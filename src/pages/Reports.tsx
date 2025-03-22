@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Button, DatePicker, Select, Space, Tooltip, message, Typography, Empty, List, Tag } from 'antd';
+import { Card, Button, DatePicker, Select, Space, Tooltip, message, Typography, Empty, List, Tag } from 'antd';
 import { FileText, Download, Clock, User, Package } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
@@ -62,10 +62,10 @@ const Reports = () => {
   // Filter data berdasarkan tanggal jika ada filter tanggal
   const filteredSales = dateRange[0] && dateRange[1]
     ? sales.filter(sale => {
-        const saleDate = new Date(sale.date);
-        const startDate = dateRange[0]?.toDate();
-        const endDate = dateRange[1]?.toDate();
-        return startDate && endDate ? saleDate >= startDate && saleDate <= endDate : false;
+        const saleDate = dayjs(sale.date);
+        return dateRange[0] && dateRange[1] ? 
+          saleDate.isAfter(dateRange[0]) && saleDate.isBefore(dateRange[1].add(1, 'day')) : 
+          false;
       })
     : sales;
 
@@ -75,7 +75,7 @@ const Reports = () => {
       case 'sales':
         return filteredSales.map(sale => ({
           'id': sale.id,
-          'Tanggal': new Date(sale.date).toLocaleDateString('id-ID'),
+          'Tanggal': dayjs(sale.date).format('DD/MM/YYYY'),
           'Pelanggan': sale.customer_name,
           'Produk': sale.products?.name || '-',
           'Jumlah': sale.quantity,
@@ -96,7 +96,7 @@ const Reports = () => {
         // Agregasi penjualan per hari
         const aggregated: Record<string, number> = {};
         filteredSales.forEach(sale => {
-          const date = new Date(sale.date).toLocaleDateString('id-ID');
+          const date = dayjs(sale.date).format('DD/MM/YYYY');
           aggregated[date] = (aggregated[date] || 0) + sale.total_amount;
         });
         return Object.keys(aggregated).map((date, index) => ({
@@ -185,20 +185,36 @@ const Reports = () => {
       
       // Add date
       doc.setFontSize(11);
-      doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 14, 30);
+      doc.text(`Tanggal: ${dayjs().format('DD/MM/YYYY')}`, 14, 30);
       
       // Create table
       const columns = Object.keys(data[0]).map(key => ({ header: key, dataKey: key }));
       
-      autoTable(doc, {
-        startY: 35,
-        head: [columns.map(c => c.header)],
-        body: data.map(item => 
-          columns.map(c => String(item[c.dataKey as keyof typeof item] || ''))
-        ),
-        theme: 'grid',
-        headStyles: { fillColor: [59, 130, 246] },
-      });
+      // Filter info if date range is applied
+      if (dateRange[0] && dateRange[1]) {
+        doc.setFontSize(10);
+        doc.text(`Periode: ${dateRange[0].format('DD/MM/YYYY')} - ${dateRange[1].format('DD/MM/YYYY')}`, 14, 38);
+        // Adjust starting Y position
+        autoTable(doc, {
+          startY: 43,
+          head: [columns.map(c => c.header)],
+          body: data.map(item => 
+            columns.map(c => String(item[c.dataKey as keyof typeof item] || ''))
+          ),
+          theme: 'grid',
+          headStyles: { fillColor: [59, 130, 246] },
+        });
+      } else {
+        autoTable(doc, {
+          startY: 35,
+          head: [columns.map(c => c.header)],
+          body: data.map(item => 
+            columns.map(c => String(item[c.dataKey as keyof typeof item] || ''))
+          ),
+          theme: 'grid',
+          headStyles: { fillColor: [59, 130, 246] },
+        });
+      }
 
       // Generate filename
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -406,79 +422,121 @@ const Reports = () => {
 
   const isMobile = isBrowser && windowWidth < 640;
 
+  // Add new dateRangePicker component
+  const renderDateRangePicker = () => {
+    return (
+      <Card className="mb-4 shadow-sm">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <Title level={5} className="m-0">Filter Periode Laporan</Title>
+            <Text type="secondary">Pilih rentang tanggal untuk melihat laporan</Text>
+          </div>
+          <Space direction="vertical" size="middle">
+            <DatePicker.RangePicker 
+              value={dateRange} 
+              onChange={(dates) => {
+                if (dates) {
+                  setDateRange([dates[0], dates[1]]);
+                } else {
+                  setDateRange([null, null]);
+                }
+              }}
+              format="DD/MM/YYYY"
+              placeholder={['Tanggal Awal', 'Tanggal Akhir']}
+              allowClear
+              className="w-full"
+            />
+            {dateRange[0] && dateRange[1] && (
+              <div className="text-right">
+                <Text type="secondary" className="block mb-1">
+                  Menampilkan laporan periode:
+                </Text>
+                <Tag color="blue" className="px-2 py-1">
+                  {dateRange[0].format('DD/MM/YYYY')} - {dateRange[1].format('DD/MM/YYYY')}
+                </Tag>
+              </div>
+            )}
+          </Space>
+        </div>
+      </Card>
+    );
+  };
+
+  // Render main content
   return (
-    <div className="animate-fadeIn">
-      <Row gutter={[16, 16]}>
-        <Col xs={24}>
-          <Card className="hover:shadow-lg transition-shadow duration-300">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-              <Title level={4} className="mb-0">Laporan Bisnis</Title>
+    <div className="animate-fadeIn pb-10">
+      <div className="mb-4">
+        <Card 
+          className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-all duration-300"
+          title={
+            <div className="flex items-center space-x-2">
+              <FileText className="w-5 h-5 text-blue-600" />
+              <span>Laporan</span>
             </div>
-            
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-              <Space className="flex-wrap animate-slideInLeft mobile-full-width" style={{ width: '100%' }}>
-                <DatePicker.RangePicker 
-                  className="w-full transition-colors hover:border-blue-400 mobile-full-width" 
-                  placeholder={['Tanggal Mulai', 'Tanggal Akhir']}
-                  onChange={(dates) => {
-                    if (dates) {
-                      setDateRange([dates[0] || null, dates[1] || null]);
-                    } else {
-                      setDateRange([null, null]);
-                    }
-                  }}
-                />
+          }
+        >
+          <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4">
+            <div>
+              <Title level={5} className="m-0">Jenis Laporan</Title>
+              <Text type="secondary">Pilih jenis laporan yang ingin Anda lihat</Text>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Space>
                 <Select
-                  defaultValue="sales"
-                  className="w-full sm:w-40 transition-colors hover:border-blue-400 mobile-full-width"
+                  value={reportType}
+                  onChange={setReportType}
+                  style={{ minWidth: 180 }}
                   options={[
-                    { value: 'sales', label: 'Laporan Penjualan' },
-                    { value: 'inventory', label: 'Laporan Inventaris' },
-                    { value: 'revenue', label: 'Laporan Pendapatan' },
+                    { value: 'sales', label: 'Penjualan' },
+                    { value: 'inventory', label: 'Inventaris' },
+                    { value: 'revenue', label: 'Pendapatan' },
                   ]}
-                  onChange={(value) => setReportType(value)}
                 />
                 <Select
                   value={currency}
-                  onChange={(value: 'IDR' | 'USD') => setCurrency(value)}
+                  onChange={setCurrency}
+                  style={{ minWidth: 100 }}
                   options={[
-                    { value: 'IDR', label: 'Rupiah (IDR)' },
-                    { value: 'USD', label: 'US Dollar (USD)' },
+                    { value: 'IDR', label: 'IDR' },
+                    { value: 'USD', label: 'USD' },
                   ]}
-                  className="w-full sm:w-40 transition-colors hover:border-blue-400 mobile-full-width"
                 />
               </Space>
-              <Space className="animate-slideInRight mobile-full-width" wrap>
-                <Tooltip title="Download dalam format Excel">
+              <Space>
+                <Tooltip title="Download Excel">
                   <Button
                     type="primary"
+                    ghost
                     icon={<Download className="w-4 h-4" />}
-                    className="bg-blue-600 hover:bg-blue-700 transition-colors"
                     onClick={exportToExcel}
-                    disabled={loading || sales.length === 0}
+                    loading={loading}
                   >
-                    Ekspor Excel
+                    Excel
                   </Button>
                 </Tooltip>
-                <Tooltip title="Download dalam format PDF">
+                <Tooltip title="Download PDF">
                   <Button
+                    danger
+                    type="primary"
+                    ghost
                     icon={<FileText className="w-4 h-4" />}
-                    className="hover:bg-gray-100 transition-colors"
                     onClick={exportToPDF}
-                    disabled={loading || sales.length === 0}
+                    loading={loading}
                   >
-                    Ekspor PDF
+                    PDF
                   </Button>
                 </Tooltip>
               </Space>
             </div>
+          </div>
+        </Card>
+      </div>
 
-            <div className="animate-slideUp">
-              {renderReportContent()}
-            </div>
-          </Card>
-        </Col>
-      </Row>
+      {/* Tampilkan Date Range Picker */}
+      {renderDateRangePicker()}
+
+      {/* Render report content */}
+      {renderReportContent()}
     </div>
   );
 };
