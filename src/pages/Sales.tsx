@@ -7,6 +7,9 @@ import dayjs from 'dayjs';
 import { DeleteOutlined } from '@ant-design/icons';
 import { formatCurrency } from '../utils/format';
 import { isBrowser } from '../utils/browser';
+import 'dayjs/locale/id'; // Import locale Indonesia
+
+dayjs.locale('id'); // Set locale ke Indonesia
 
 const { RangePicker } = DatePicker;
 
@@ -57,7 +60,7 @@ const Sales: React.FC = () => {
       const styleElement = document.createElement('style');
       styleElement.textContent = `
         .small-calendar-picker .ant-picker-panel-container {
-          max-width: 340px !important;
+          max-width: 380px !important;
         }
         .small-calendar-picker .ant-picker-panel {
           width: 100% !important;
@@ -70,26 +73,26 @@ const Sales: React.FC = () => {
           font-size: 14px !important;
         }
         .small-calendar-picker .ant-picker-cell {
-          padding: 2px 0 !important;
+          padding: 3px 0 !important;
         }
         .small-calendar-picker .ant-picker-content th {
-          height: 28px !important;
+          height: 30px !important;
         }
         .small-calendar-picker .ant-picker-cell-inner {
-          min-width: 28px !important;
-          height: 28px !important;
-          line-height: 28px !important;
+          min-width: 32px !important;
+          height: 32px !important;
+          line-height: 32px !important;
         }
         .small-calendar-picker .ant-picker-ranges {
           flex-direction: column !important;
           min-width: auto !important;
-          padding: 10px !important;
+          padding: 12px !important;
         }
         .small-calendar-picker .ant-picker-header {
-          padding: 0 8px !important;
+          padding: 0 10px !important;
         }
         .small-calendar-picker .ant-picker-header-view {
-          font-size: 14px !important;
+          font-size: 15px !important;
         }
         @media (max-width: 480px) {
           .ant-picker-dropdown {
@@ -308,6 +311,41 @@ const Sales: React.FC = () => {
                 maxWidth: isMobile ? '100%' : 'auto'
               }}
               popupClassName={isMobile ? "small-calendar-picker" : ""}
+              locale={{
+                lang: {
+                  locale: 'id',
+                  placeholder: 'Pilih tanggal',
+                  rangePlaceholder: ['Tanggal awal', 'Tanggal akhir'],
+                  today: 'Hari ini',
+                  now: 'Sekarang',
+                  backToToday: 'Kembali ke hari ini',
+                  ok: 'OK',
+                  clear: 'Hapus',
+                  month: 'Bulan',
+                  year: 'Tahun',
+                  timeSelect: 'Pilih waktu',
+                  dateSelect: 'Pilih tanggal',
+                  monthSelect: 'Pilih bulan',
+                  yearSelect: 'Pilih tahun',
+                  decadeSelect: 'Pilih dekade',
+                  previousMonth: 'Bulan sebelumnya',
+                  nextMonth: 'Bulan berikutnya',
+                  previousYear: 'Tahun sebelumnya',
+                  nextYear: 'Tahun berikutnya',
+                  previousDecade: 'Dekade sebelumnya',
+                  nextDecade: 'Dekade berikutnya',
+                  previousCentury: 'Abad sebelumnya',
+                  nextCentury: 'Abad berikutnya',
+                  week: 'Minggu',
+                },
+                timePickerLocale: {
+                  placeholder: 'Pilih waktu',
+                },
+                dateFormat: 'DD-MM-YYYY',
+                dateTimeFormat: 'DD-MM-YYYY HH:mm:ss',
+                weekFormat: 'YYYY-wo',
+                monthFormat: 'MMMM YYYY',
+              }}
             />
             <Input
               placeholder="Cari pelanggan atau produk..."
@@ -423,6 +461,36 @@ const Sales: React.FC = () => {
             <DatePicker 
               className="w-full"
               format="DD-MM-YYYY"
+              locale={{
+                lang: {
+                  locale: 'id',
+                  placeholder: 'Pilih tanggal',
+                  today: 'Hari ini',
+                  now: 'Sekarang',
+                  backToToday: 'Kembali ke hari ini',
+                  ok: 'OK',
+                  clear: 'Hapus',
+                  month: 'Bulan',
+                  year: 'Tahun',
+                  timeSelect: 'Pilih waktu',
+                  dateSelect: 'Pilih tanggal',
+                  monthSelect: 'Pilih bulan',
+                  yearSelect: 'Pilih tahun',
+                  decadeSelect: 'Pilih dekade',
+                  previousMonth: 'Bulan sebelumnya',
+                  nextMonth: 'Bulan berikutnya',
+                  previousYear: 'Tahun sebelumnya',
+                  nextYear: 'Tahun berikutnya',
+                  previousDecade: 'Dekade sebelumnya',
+                  nextDecade: 'Dekade berikutnya',
+                  previousCentury: 'Abad sebelumnya',
+                  nextCentury: 'Abad berikutnya',
+                  week: 'Minggu',
+                },
+                timePickerLocale: {
+                  placeholder: 'Pilih waktu',
+                }
+              }}
             />
           </Form.Item>
           
