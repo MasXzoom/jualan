@@ -458,9 +458,9 @@ const Reports = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <Title level={5} className="m-0">Filter Periode Laporan</Title>
-            <Text type="secondary">Pilih rentang tanggal untuk melihat laporan</Text>
+            <Text type="secondary" className={isMobile ? "text-xs" : ""}>Pilih rentang tanggal untuk melihat laporan</Text>
           </div>
-          <Space direction="vertical" size="middle" className="w-full md:w-auto max-w-full">
+          <Space direction="vertical" size={isMobile ? "small" : "middle"} className="w-full md:w-auto max-w-full">
             <DatePicker.RangePicker 
               value={dateRange} 
               onChange={(dates) => {
@@ -471,21 +471,24 @@ const Reports = () => {
                 }
               }}
               format="DD/MM/YYYY"
-              placeholder={['Tanggal Awal', 'Tanggal Akhir']}
+              placeholder={isMobile ? ['Awal', 'Akhir'] : ['Tanggal Awal', 'Tanggal Akhir']}
               allowClear
               className="w-full"
-              style={{ width: isMobile ? '100%' : 'auto', minWidth: isMobile ? 'auto' : '320px' }}
-              size={isMobile ? 'middle' : 'large'}
+              style={{ 
+                width: '100%',
+                maxWidth: isMobile ? '100%' : '320px'
+              }}
+              size={isMobile ? 'small' : 'middle'}
               popupClassName="date-range-popup"
               separator={isMobile ? "→" : "-"}
-              inputReadOnly={isMobile} // Mencegah keyboard mobile muncul, pengguna hanya menggunakan date picker
+              inputReadOnly={true} // Mencegah keyboard mobile muncul, pengguna hanya menggunakan date picker
             />
             {dateRange[0] && dateRange[1] && (
               <div className={`${isMobile ? 'text-center' : 'text-right'}`}>
-                <Text type="secondary" className="block mb-1">
+                <Text type="secondary" className={`block mb-1 ${isMobile ? 'text-xs' : ''}`}>
                   Menampilkan laporan periode:
                 </Text>
-                <Tag color="blue" className="px-2 py-1">
+                <Tag color="blue" className={`px-2 ${isMobile ? 'py-0 text-xs' : 'py-1'}`}>
                   {dateRange[0].format('DD/MM/YYYY')} - {dateRange[1].format('DD/MM/YYYY')}
                 </Tag>
               </div>

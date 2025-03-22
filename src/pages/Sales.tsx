@@ -16,7 +16,7 @@ interface ProductInfo {
   price: number;
 }
 
-interface Sale {
+interface SaleType {
   id: string;
   date: string;
   customer_name: string;
@@ -34,11 +34,13 @@ const Sales: React.FC = () => {
   const [form] = Form.useForm();
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
   const { products, sales, loading, fetchProducts, fetchSales, subscribeToSales } = useStore();
-  const [isBrowserEnv, setIsBrowserEnv] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [user, setUser] = useState<{id: string, email?: string} | null>(null);
   const [searchText, setSearchText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Mendeteksi apakah tampilan mobile atau tidak
+  const isMobile = isBrowser() && window.innerWidth <= 768;
 
   const fetchData = useCallback(() => {
     fetchProducts();
@@ -57,11 +59,6 @@ const Sales: React.FC = () => {
     getCurrentUser();
     fetchData();
     const unsubscribe = subscribeToSales();
-    
-    // Hanya set isBrowser di client-side untuk menghindari error di server
-    if (isBrowser()) {
-      setIsBrowserEnv(true);
-    }
     
     return () => {
       if (typeof unsubscribe === 'function') {
@@ -231,8 +228,6 @@ const Sales: React.FC = () => {
     }
   };
 
-  const isMobile = isBrowser() && window.innerWidth <= 768;
-
   return (
     <div className="animate-fadeIn">
       <Card className="hover:shadow-lg transition-shadow duration-300">
@@ -241,12 +236,19 @@ const Sales: React.FC = () => {
             <RangePicker 
               className="w-full transition-all mobile-full-width" 
               onChange={(dates) => setDateRange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null])}
-              placeholder={['Tanggal Mulai', 'Tanggal Akhir']}
+              placeholder={isMobile ? ['Awal', 'Akhir'] : ['Tanggal Mulai', 'Tanggal Akhir']}
+              format="DD/MM/YYYY"
+              size={isMobile ? 'small' : 'middle'}
+              inputReadOnly={true}
+              style={{ 
+                maxWidth: isMobile ? '100%' : 'auto'
+              }}
             />
             <Input
               placeholder="Cari pelanggan atau produk..."
               onChange={e => setSearchText(e.target.value)}
               className="mobile-full-width"
+              size={isMobile ? 'small' : 'middle'}
             />
           </Space>
           <Button
