@@ -203,8 +203,8 @@ const Reports = () => {
       // Create table
       const columns = Object.keys(data[0]).map(key => ({ header: key, dataKey: key }));
       
-      // Adjust starting Y position and save the final Y position after rendering the table
-      const finalY = autoTable(doc, {
+      // Draw the table with the data
+      autoTable(doc, {
         startY: startY,
         head: [columns.map(c => c.header)],
         body: data.map(item => 
@@ -212,56 +212,53 @@ const Reports = () => {
         ),
         theme: 'grid',
         headStyles: { fillColor: [59, 130, 246] },
-      }) as unknown as { finalY: number };
+        didDrawPage: () => {
+          // Add page header if needed
+          doc.setFontSize(10);
+          doc.text(title, 14, 10);
+        }
+      });
       
-      // Add totals at the bottom after the table
-      let bottomY = finalY.finalY || startY + 30;
-      bottomY += 10; // Add some spacing after the table
+      // Since jspdf-autotable doesn't have a clean way to get the end position in TypeScript,
+      // use a fixed position from the bottom for totals
+      let yPosition = doc.internal.pageSize.height - 40;
+      
+      // Add horizontal line before totals
+      doc.setDrawColor(200, 200, 200);
+      doc.line(14, yPosition - 5, 196, yPosition - 5);
       
       // Calculate and render totals at the bottom
       if (reportType === 'sales') {
         const totalAmount = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
         const totalProductsSold = filteredSales.reduce((sum, sale) => sum + sale.quantity, 0);
         
-        // Add horizontal line before totals
-        doc.setDrawColor(200, 200, 200);
-        doc.line(14, bottomY - 5, 196, bottomY - 5);
-        
         // Add summary information
         doc.setFontSize(10);
         doc.setTextColor(0, 0, 0);
-        doc.text(`Total Penjualan: ${formatCurrencyWithType(totalAmount)}`, 14, bottomY);
-        doc.text(`Total Produk Terjual: ${totalProductsSold} item`, 14, bottomY + 7);
+        doc.text(`Total Penjualan: ${formatCurrencyWithType(totalAmount)}`, 14, yPosition);
+        doc.text(`Total Produk Terjual: ${totalProductsSold} item`, 14, yPosition + 7);
       } else if (reportType === 'inventory') {
         const totalProducts = products.length;
         const totalStock = products.reduce((sum, product) => sum + product.stock, 0);
         const totalValue = products.reduce((sum, product) => sum + (product.price * product.stock), 0);
         
-        // Add horizontal line before totals
-        doc.setDrawColor(200, 200, 200);
-        doc.line(14, bottomY - 5, 196, bottomY - 5);
-        
         // Add summary information
         doc.setFontSize(10);
         doc.setTextColor(0, 0, 0);
-        doc.text(`Total Produk: ${totalProducts} jenis`, 14, bottomY);
-        doc.text(`Total Stok: ${totalStock} item`, 14, bottomY + 7);
-        doc.text(`Total Nilai Inventaris: ${formatCurrencyWithType(totalValue)}`, 14, bottomY + 14);
+        doc.text(`Total Produk: ${totalProducts} jenis`, 14, yPosition);
+        doc.text(`Total Stok: ${totalStock} item`, 14, yPosition + 7);
+        doc.text(`Total Nilai Inventaris: ${formatCurrencyWithType(totalValue)}`, 14, yPosition + 14);
       } else if (reportType === 'revenue') {
         const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.total_amount, 0);
         const totalTransactions = filteredSales.length;
         const averageTransaction = totalTransactions > 0 ? totalRevenue / totalTransactions : 0;
         
-        // Add horizontal line before totals
-        doc.setDrawColor(200, 200, 200);
-        doc.line(14, bottomY - 5, 196, bottomY - 5);
-        
         // Add summary information
         doc.setFontSize(10);
         doc.setTextColor(0, 0, 0);
-        doc.text(`Total Pendapatan: ${formatCurrencyWithType(totalRevenue)}`, 14, bottomY);
-        doc.text(`Total Transaksi: ${totalTransactions}`, 14, bottomY + 7);
-        doc.text(`Rata-rata Per Transaksi: ${formatCurrencyWithType(averageTransaction)}`, 14, bottomY + 14);
+        doc.text(`Total Pendapatan: ${formatCurrencyWithType(totalRevenue)}`, 14, yPosition);
+        doc.text(`Total Transaksi: ${totalTransactions}`, 14, yPosition + 7);
+        doc.text(`Rata-rata Per Transaksi: ${formatCurrencyWithType(averageTransaction)}`, 14, yPosition + 14);
       }
 
       // Generate filename
