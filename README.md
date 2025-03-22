@@ -46,6 +46,42 @@ VITE_SUPABASE_URL=<your-supabase-url>
 VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
 ```
 
+## Deployment ke Vercel
+
+Untuk melakukan deployment aplikasi ke Vercel, ikuti langkah-langkah berikut:
+
+1. Daftar/login ke [Vercel](https://vercel.com)
+2. Buat project baru dengan mengimpor repositori GitHub Anda
+3. Pada bagian "Configure Project", tambahkan Environment Variables:
+   - Klik "Add" pada bagian "Environment Variables"
+   - Tambahkan variabel `VITE_SUPABASE_URL` dengan nilai URL Supabase Anda
+   - Tambahkan variabel `VITE_SUPABASE_ANON_KEY` dengan nilai Anon Key Supabase Anda
+   - **Penting:** Pastikan nama variabel tepat sama dengan yang digunakan di aplikasi
+4. Klik "Deploy" untuk memulai proses deployment
+
+Jika mendapatkan error "Environment Variable references Secret which does not exist", pastikan Anda:
+- Menambahkan variabel langsung ke dalam project (bukan sebagai Secret)
+- Menggunakan nama yang sama persis: `VITE_SUPABASE_URL` dan `VITE_SUPABASE_ANON_KEY`
+- Nilai variabel diisi dengan benar tanpa tanda kutip
+
+### Deployment Manual dengan Vercel CLI
+
+Alternatif lain, Anda dapat menggunakan Vercel CLI:
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Login ke Vercel
+vercel login
+
+# Deploy
+vercel --env VITE_SUPABASE_URL=<your-supabase-url> --env VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+
+# Untuk production
+vercel --prod --env VITE_SUPABASE_URL=<your-supabase-url> --env VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+```
+
 ## Struktur Folder
 
 - `/src/components` - UI components
