@@ -129,12 +129,13 @@ function App() {
           <GlobalNotification />
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/" element={<ProtectedRoute />}>
-              <Route index element={<Reports />} />
-              <Route path="products" element={<Products />} />
-              <Route path="sales" element={<Sales />} />
-              <Route path="reports" element={<Reports />} />
-            </Route>
+          {/* Rute yang dilindungi, memerlukan autentikasi */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<Reports />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/sales" element={<Sales />} />
+            <Route path="/reports" element={<Reports />} />
+          </Route>
             <Route path="*" element={<ErrorPage />} />
           </Routes>
         </div>
