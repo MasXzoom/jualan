@@ -11,6 +11,9 @@ import { supabase } from './lib/supabase';
 import { Spin, message, ConfigProvider } from 'antd';
 import { theme, colorScheme } from './theme';
 import GlobalNotification from './components/common/GlobalNotification';
+import logoSvg from './assets/logo.svg';
+
+console.log('App module loaded');
 
 // Komponen untuk route yang memerlukan autentikasi
 const ProtectedRoute = () => {
@@ -32,9 +35,10 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  console.log('App is initializing...');
+  console.log('App component initialized');
 
   useEffect(() => {
+    console.log('App useEffect running');
     const checkAuth = async () => {
       try {
         console.log('Checking auth session...');
@@ -66,6 +70,7 @@ function App() {
         }
         
         return () => {
+          console.log('Cleaning up auth listener');
           subscription.unsubscribe();
         };
       } catch (err) {
@@ -73,6 +78,7 @@ function App() {
         setError('Gagal memeriksa status otentikasi. Silakan coba lagi.');
         message.error('Gagal memeriksa status otentikasi');
       } finally {
+        console.log('Auth check complete, setting loading to false');
         setLoading(false);
       }
     };
@@ -81,8 +87,10 @@ function App() {
   }, [setUserId]);
   
   if (loading) {
+    console.log('Rendering loading state');
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <img src={logoSvg} alt="IPUR CUYUNK" className="w-16 h-16 mb-4" />
         <Spin size="large" />
         <p className="mt-4 text-gray-600">Memuat aplikasi...</p>
       </div>
@@ -90,8 +98,10 @@ function App() {
   }
   
   if (error) {
+    console.log('Rendering error state:', error);
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+        <img src={logoSvg} alt="IPUR CUYUNK" className="w-16 h-16 mb-4" />
         <div className="text-center max-w-md">
           <h2 className="text-xl font-semibold text-red-600 mb-2">Error</h2>
           <p className="text-gray-700 mb-4">{error}</p>
@@ -106,11 +116,11 @@ function App() {
     );
   }
 
-  console.log('App rendering, userId:', userId ? 'exists' : 'none');
+  console.log('Rendering main app, userId:', userId ? 'exists' : 'none');
 
   return (
-    <ConfigProvider theme={theme}>
-      <Router>
+    <Router>
+      <ConfigProvider theme={theme}>
         <div style={{ colorScheme }}>
           <GlobalNotification />
           <Routes>
@@ -124,8 +134,8 @@ function App() {
             </Route>
           </Routes>
         </div>
-      </Router>
-    </ConfigProvider>
+      </ConfigProvider>
+    </Router>
   );
 }
 

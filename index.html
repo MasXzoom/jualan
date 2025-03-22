@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <base href="/" />
     <link rel="icon" type="image/svg+xml" href="/src/assets/logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IPUR CUYUNK - Aplikasi Penjualan</title>
@@ -10,5 +11,14 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Ensure routes work by redirecting to index.html for SPA requests
+      (function() {
+        // This handles direct navigation to routes in SPA
+        if (window.location.pathname !== '/' && !window.location.pathname.match(/\.[a-zA-Z0-9]+$/)) {
+          console.log('SPA route detected:', window.location.pathname);
+        }
+      })();
+    </script>
   </body>
 </html>

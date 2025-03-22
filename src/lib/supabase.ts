@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
+console.log('Starting Supabase client initialization...');
+
 // Cek environment variables yang tersedia
 console.log('Environment variables available:', {
   VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL ? 'defined' : 'undefined',
@@ -13,10 +15,22 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIU
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('Supabase URL and/or Anon Key is missing. Check your environment variables.');
 } else {
-  console.log('Initializing Supabase client with URL:', supabaseUrl.substring(0, 15) + '...');
+  console.log('Using Supabase URL:', supabaseUrl);
+  console.log('Using Supabase Anon Key:', supabaseAnonKey.substring(0, 15) + '...');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+let supabaseClient;
+
+try {
+  console.log('Creating Supabase client...');
+  supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+  console.log('Supabase client created successfully');
+} catch (error) {
+  console.error('Error creating Supabase client:', error);
+  throw error;
+}
+
+export const supabase = supabaseClient;
 
 // Type definitions for Supabase
 export type Tables = {

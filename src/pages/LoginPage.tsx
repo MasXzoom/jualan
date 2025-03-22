@@ -8,6 +8,8 @@ import logoSvg from '../assets/logo.svg';
 
 const { Title, Text } = Typography;
 
+console.log('LoginPage module loaded');
+
 interface AuthError {
   message: string;
 }
@@ -20,8 +22,33 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const userId = useStore(state => state.userId);
+  const [supabaseReady, setSupabaseReady] = useState(false);
 
   console.log('LoginPage rendering, userId:', userId ? 'exists' : 'none');
+
+  // Cek apakah Supabase sudah siap
+  useEffect(() => {
+    const checkSupabase = async () => {
+      try {
+        console.log('Checking Supabase connection...');
+        // Minimal test call ke Supabase
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Supabase connection test failed:', error);
+          setError('Tidak dapat terhubung ke layanan autentikasi. Silakan coba lagi nanti.');
+        } else {
+          console.log('Supabase connection test successful:', data ? 'Session data received' : 'No active session');
+          setSupabaseReady(true);
+        }
+      } catch (err) {
+        console.error('Error checking Supabase:', err);
+        setError('Kesalahan terjadi saat menyiapkan layanan autentikasi.');
+      }
+    };
+    
+    checkSupabase();
+  }, []);
 
   // Jika pengguna sudah login, redirect ke dashboard
   useEffect(() => {
@@ -37,6 +64,11 @@ const LoginPage: React.FC = () => {
       console.log('Attempting login with email:', values.email);
       setLoading(true);
       setError(null);
+
+      if (!supabaseReady) {
+        console.error('Supabase not ready yet');
+        throw new Error('Layanan autentikasi belum siap. Silakan coba lagi.');
+      }
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
@@ -68,6 +100,11 @@ const LoginPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
+      if (!supabaseReady) {
+        console.error('Supabase not ready yet');
+        throw new Error('Layanan autentikasi belum siap. Silakan coba lagi.');
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
@@ -90,6 +127,27 @@ const LoginPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  if (error && !supabaseReady) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
+        <img src={logoSvg} alt="IPUR CUYUNK" className="w-16 h-16 mb-4" />
+        <Card className="w-full max-w-md shadow-lg rounded-xl overflow-hidden border-t-4 border-t-red-600">
+          <div className="text-center">
+            <Title level={4} className="text-red-600">Gagal Terhubung</Title>
+            <Text className="block mb-4">{error}</Text>
+            <Button 
+              type="primary" 
+              onClick={() => window.location.reload()}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Coba Lagi
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
@@ -133,7 +191,7 @@ const LoginPage: React.FC = () => {
               prefix={<Mail className="mr-2 text-gray-400" size={18} />} 
               placeholder="Email" 
               size="large"
-              disabled={loading}
+              disabled={loading || !supabaseReady}
             />
           </Form.Item>
 
@@ -148,13 +206,13 @@ const LoginPage: React.FC = () => {
               prefix={<Lock className="mr-2 text-gray-400" size={18} />} 
               placeholder="Password" 
               size="large"
-              disabled={loading}
+              disabled={loading || !supabaseReady}
             />
           </Form.Item>
 
           {mode === 'login' && (
             <Form.Item name="remember" valuePropName="checked">
-              <Checkbox disabled={loading}>Ingat saya</Checkbox>
+              <Checkbox disabled={loading || !supabaseReady}>Ingat saya</Checkbox>
             </Form.Item>
           )}
 
@@ -165,10 +223,10 @@ const LoginPage: React.FC = () => {
               block
               size="large"
               icon={<LogIn className="w-5 h-5" />}
-              loading={loading}
+              loading={loading || !supabaseReady}
               className="bg-blue-600 hover:bg-blue-700"
             >
-              {mode === 'login' ? 'Masuk' : 'Daftar'}
+              {loading ? (mode === 'login' ? 'Sedang Login...' : 'Mendaftar...') : (mode === 'login' ? 'Masuk' : 'Daftar')}
             </Button>
           </Form.Item>
         </Form>
@@ -181,7 +239,7 @@ const LoginPage: React.FC = () => {
                 type="link" 
                 className="p-0" 
                 onClick={() => setMode('register')}
-                disabled={loading}
+                disabled={loading || !supabaseReady}
               >
                 Daftar disini
               </Button>
@@ -193,7 +251,7 @@ const LoginPage: React.FC = () => {
                 type="link" 
                 className="p-0" 
                 onClick={() => setMode('login')}
-                disabled={loading}
+                disabled={loading || !supabaseReady}
               >
                 Login
               </Button>
